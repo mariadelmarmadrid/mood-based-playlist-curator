@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">Mood</string>
+    <string name="app_name">Mood-Based Playlist Curator</string>
+    <string name="hint_moodTitle">Enter your mood</string>
+    <string name="button_addMood">Add Mood</string>
 </resources>
