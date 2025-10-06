@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Mood-Based Playlist Curator</string>
     <string name="hint_moodTitle">Enter your mood</string>
+    <string name="hint_moodNote">Enter a note (optional)</string>
     <string name="button_addMood">Add Mood</string>
+    <string name="menu_addMood">Add Mood</string>
 </resources>
