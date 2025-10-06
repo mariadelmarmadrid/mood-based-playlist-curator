@@ -35,12 +35,12 @@ class MoodListActivity : AppCompatActivity() {
         binding.recyclerView.adapter = MoodAdapter(app.moods)
     }
 
-    /*override fun onCreateOptionsMenu(menu: Menu): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         return super.onCreateOptionsMenu(menu)
-    }*/
+    }
 
-    /*override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.item_add -> {
                 val launcherIntent = Intent(this, MoodActivity::class.java)
@@ -48,7 +48,7 @@ class MoodListActivity : AppCompatActivity() {
             }
         }
         return super.onOptionsItemSelected(item)
-    }*/
+    }
 
     private val getResult =
         registerForActivityResult(
