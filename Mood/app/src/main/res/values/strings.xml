@@ -9,12 +9,14 @@
     <string name="label_social_activity">Who did you spend time with?</string>
     <string name="label_hobby">Which hobby did you do?</string>
     <string name="label_food_type">What kind of food did you eat?</string>
-    <string name="button_delete">Delete</string>
+
 
 
     <!-- Buttons and Menus -->
     <string name="button_addMood">Add Mood</string>
     <string name="menu_addMood">Add Mood</string>
+    <string name="button_cancel">Cancel</string>
+    <string name="button_delete">Delete</string>
 
     <!-- Dropdown Options -->
     <string-array name="mood_types">
