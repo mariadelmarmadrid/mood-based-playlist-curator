@@ -22,13 +22,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <!-- Note -->
-        <EditText
-            android:id="@+id/note"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Write a note about your mood"
-            android:inputType="textMultiLine" />
 
         <!-- Sleep Quality -->
         <TextView
@@ -73,6 +66,14 @@
             android:id="@+id/foodTypeSpinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+
+        <!-- Note -->
+        <EditText
+            android:id="@+id/note"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/hint_moodNote"
+            android:inputType="textMultiLine" />
 
 
         <Button
