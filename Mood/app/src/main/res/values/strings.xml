@@ -1,9 +1,22 @@
 <resources>
     <string name="app_name">Mood-Based Playlist Curator</string>
+
+    <!-- Mood Input Labels and Hints -->
+    <string name="label_select_mood">Select your mood:</string>
     <string name="hint_moodTitle">Enter your mood</string>
     <string name="hint_moodNote">Enter a note (optional)</string>
+    <string name="label_sleep_quality">How was your sleep?</string>
+    <string name="label_social_activity">Who did you spend time with?</string>
+    <string name="label_hobby">Which hobby did you do?</string>
+    <string name="label_food_type">What kind of food did you eat?</string>
+    <string name="label_date">Date of this mood:</string>
+    <string name="hint_date">Select or enter a date</string>
+
+    <!-- Buttons and Menus -->
     <string name="button_addMood">Add Mood</string>
     <string name="menu_addMood">Add Mood</string>
+
+    <!-- Dropdown Options -->
     <string-array name="mood_types">
         <item>Happy</item>
         <item>Relaxed</item>
@@ -43,5 +56,4 @@
         <item>No Sugar</item>
         <item>None</item>
     </string-array>
-
 </resources>
