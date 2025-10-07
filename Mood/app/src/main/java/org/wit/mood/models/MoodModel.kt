@@ -1,14 +1,13 @@
 package org.wit.mood.models
 
-enum class MoodType(val label: String, val score: Int) {
-    Happy("Happy", 2),
-    Relaxed("Relaxed", 1),
-    Neutral("Neutral", 0),
-    Sad("Sad", -1),
-    Angry("Angry", -2)
-}
+import java.time.LocalDateTime
 
 data class MoodModel(
-    var type: MoodType = MoodType.Neutral,
-    var note: String = ""
+    var type: MoodType = MoodType.NEUTRAL,
+    var note: String = "",
+    var sleep: SleepQuality = SleepQuality.MEDIUM,
+    var social: SocialActivity = SocialActivity.NONE,
+    var hobby: Hobby = Hobby.NONE,
+    var food: FoodType = FoodType.NONE,
+    var timestamp: String = LocalDateTime.now().toString()
 )
