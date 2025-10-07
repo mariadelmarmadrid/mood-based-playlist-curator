@@ -37,8 +37,11 @@ class MoodActivity : AppCompatActivity() {
                 mood.type = selectedMood
                 mood.note = binding.note.text.toString()
                 app.moods.add(mood.copy())
-
                 i("Mood Added: $mood")
+                for (i in app.moods.indices) {
+                    i("Mood[$i]: ${app.moods[i]}")
+                }
+
                 setResult(RESULT_OK)
                 finish()
             } else {
