@@ -1,61 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
-    tools:context="org.wit.mood.activities.MoodActivity">
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Mood Type -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_select_mood" />
 
         <Spinner
-            android:id="@+id/spinnerMoodType"
+            android:id="@+id/moodTypeSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Note -->
+        <EditText
+            android:id="@+id/note"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:entries="@array/mood_types" />
+            android:hint="Write a note about your mood"
+            android:inputType="textMultiLine" />
+
+        <!-- Sleep Quality -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_sleep_quality" />
 
         <Spinner
-            android:id="@+id/spinnerSleep"
+            android:id="@+id/sleepQualitySpinner"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Social Activity -->
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:entries="@array/sleep_quality" />
+            android:text="@string/label_social_activity" />
 
         <Spinner
-            android:id="@+id/spinnerSocial"
+            android:id="@+id/socialActivitySpinner"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Hobby -->
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:entries="@array/social_activity" />
+            android:text="@string/label_hobby" />
 
         <Spinner
-            android:id="@+id/spinnerHobby"
+            android:id="@+id/hobbySpinner"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Food Type -->
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:entries="@array/hobbies" />
+            android:text="@string/label_food_type" />
 
         <Spinner
-            android:id="@+id/spinnerFood"
+            android:id="@+id/foodTypeSpinner"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Date -->
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:entries="@array/food_types" />
+            android:text="@string/label_date" />
 
         <EditText
-            android:id="@+id/editNote"
+            android:id="@+id/dateInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Add a note..."
-            android:inputType="text"
-            android:layout_marginTop="8dp"/>
+            android:hint="Enter date (e.g., 2025-10-07)"
+            android:inputType="date" />
 
         <Button
-            android:id="@+id/btnAddMood"
+            android:id="@+id/btnAdd"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:text="Add Mood" />
-
     </LinearLayout>
 </ScrollView>
