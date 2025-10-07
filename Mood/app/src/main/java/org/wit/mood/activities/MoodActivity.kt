@@ -6,6 +6,7 @@ import com.google.android.material.snackbar.Snackbar
 import org.wit.mood.databinding.ActivityMoodBinding
 import org.wit.mood.main.MainApp
 import org.wit.mood.models.MoodModel
+import org.wit.mood.models.MoodType
 import timber.log.Timber.i
 
 class MoodActivity : AppCompatActivity() {
@@ -18,24 +19,30 @@ class MoodActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMoodBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         app = application as MainApp
 
         i("Mood Activity started...")
 
         binding.btnAdd.setOnClickListener {
-            mood.mood = binding.moodTitle.text.toString()
-            mood.note = binding.note.text.toString()
-            if (mood.mood.isNotEmpty()) {
+            val selectedMood = when (binding.moodGroup.checkedRadioButtonId) {
+                binding.moodHappy.id -> MoodType.Happy
+                binding.moodRelaxed.id -> MoodType.Relaxed
+                binding.moodNeutral.id -> MoodType.Neutral
+                binding.moodSad.id -> MoodType.Sad
+                binding.moodAngry.id -> MoodType.Angry
+                else -> null
+            }
+
+            if (selectedMood != null) {
+                mood.type = selectedMood
+                mood.note = binding.note.text.toString()
                 app.moods.add(mood.copy())
-                i("Add Button Pressed: $mood")
-                for (i in app.moods.indices) {
-                    i("Mood[$i]: ${this.app.moods[i]}")
-                }
+
+                i("Mood Added: $mood")
                 setResult(RESULT_OK)
                 finish()
             } else {
-                Snackbar.make(it, "Please enter your mood", Snackbar.LENGTH_LONG).show()
+                Snackbar.make(it, "Please select a mood", Snackbar.LENGTH_LONG).show()
             }
         }
     }
