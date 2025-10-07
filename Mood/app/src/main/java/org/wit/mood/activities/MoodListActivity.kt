@@ -79,8 +79,9 @@ class MoodAdapter(private var moods: List<MoodModel>) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(mood: MoodModel) {
-            binding.moodTitle.text = mood.mood
+            binding.moodTitle.text = mood.type.label
             binding.note.text = mood.note
         }
+
     }
 }
