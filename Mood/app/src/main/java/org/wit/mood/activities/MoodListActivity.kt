@@ -81,7 +81,9 @@ class MoodAdapter(private var moods: List<MoodModel>) :
         fun bind(mood: MoodModel) {
             binding.moodTitle.text = mood.type.label
             binding.note.text = mood.note
+            binding.moodTimestamp.text = mood.timestamp
         }
+
 
     }
 }
