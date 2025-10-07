@@ -4,4 +4,44 @@
     <string name="hint_moodNote">Enter a note (optional)</string>
     <string name="button_addMood">Add Mood</string>
     <string name="menu_addMood">Add Mood</string>
+    <string-array name="mood_types">
+        <item>Happy</item>
+        <item>Relaxed</item>
+        <item>Neutral</item>
+        <item>Sad</item>
+        <item>Angry</item>
+    </string-array>
+
+    <string-array name="sleep_quality">
+        <item>Good</item>
+        <item>Medium</item>
+        <item>Poor</item>
+    </string-array>
+
+    <string-array name="social_activity">
+        <item>Family</item>
+        <item>Friends</item>
+        <item>Date</item>
+        <item>Party</item>
+        <item>None</item>
+    </string-array>
+
+    <string-array name="hobbies">
+        <item>Movies</item>
+        <item>Reading</item>
+        <item>Games</item>
+        <item>Sport</item>
+        <item>Relaxation</item>
+        <item>None</item>
+    </string-array>
+
+    <string-array name="food_types">
+        <item>Healthy</item>
+        <item>Fast Food</item>
+        <item>Homemade</item>
+        <item>Restaurant</item>
+        <item>No Sugar</item>
+        <item>None</item>
+    </string-array>
+
 </resources>
