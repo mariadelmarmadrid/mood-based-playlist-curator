@@ -74,18 +74,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <!-- Date -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/label_date" />
-
-        <EditText
-            android:id="@+id/dateInput"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Enter date (e.g., 2025-10-07)"
-            android:inputType="date" />
 
         <Button
             android:id="@+id/btnAdd"

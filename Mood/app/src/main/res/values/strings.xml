@@ -9,8 +9,6 @@
     <string name="label_social_activity">Who did you spend time with?</string>
     <string name="label_hobby">Which hobby did you do?</string>
     <string name="label_food_type">What kind of food did you eat?</string>
-    <string name="label_date">Date of this mood:</string>
-    <string name="hint_date">Select or enter a date</string>
 
     <!-- Buttons and Menus -->
     <string name="button_addMood">Add Mood</string>
