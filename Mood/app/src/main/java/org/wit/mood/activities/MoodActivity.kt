@@ -10,6 +10,7 @@ import org.wit.mood.models.*
 import timber.log.Timber.i
 import java.time.LocalDateTime
 import org.wit.mood.R
+import java.time.format.DateTimeFormatter
 
 class MoodActivity : AppCompatActivity() {
 
@@ -24,31 +25,38 @@ class MoodActivity : AppCompatActivity() {
         app = application as MainApp
         i("Mood Activity started...")
 
-        // Setup spinners
-        setupSpinner(binding.spinnerMoodType, R.array.mood_types)
-        setupSpinner(binding.spinnerSleep, R.array.sleep_quality)
-        setupSpinner(binding.spinnerSocial, R.array.social_activity)
-        setupSpinner(binding.spinnerHobby, R.array.hobbies)
-        setupSpinner(binding.spinnerFood, R.array.food_types)
+        setupSpinner(binding.moodTypeSpinner, R.array.mood_types)
+        setupSpinner(binding.sleepQualitySpinner, R.array.sleep_quality)
+        setupSpinner(binding.socialActivitySpinner, R.array.social_activity)
+        setupSpinner(binding.hobbySpinner, R.array.hobbies)
+        setupSpinner(binding.foodTypeSpinner, R.array.food_types)
 
-        binding.btnAddMood.setOnClickListener {
+        binding.btnAdd.setOnClickListener {
+            val current = LocalDateTime.now()
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+            val timestamp = current.format(formatter)
+
             val mood = MoodModel(
-                type = MoodType.valueOf(binding.spinnerMoodType.selectedItem.toString().uppercase()),
-                note = binding.editNote.text.toString(),
-                sleep = SleepQuality.valueOf(binding.spinnerSleep.selectedItem.toString().uppercase()),
-                social = SocialActivity.valueOf(binding.spinnerSocial.selectedItem.toString().uppercase()),
-                hobby = Hobby.valueOf(binding.spinnerHobby.selectedItem.toString().uppercase()),
-                food = FoodType.valueOf(binding.spinnerFood.selectedItem.toString().uppercase()),
-                timestamp = LocalDateTime.now().toString()
+                type = MoodType.valueOf(binding.moodTypeSpinner.selectedItem.toString().uppercase()),
+                note = binding.note.text.toString(),
+                sleep = SleepQuality.valueOf(binding.sleepQualitySpinner.selectedItem.toString().uppercase()),
+                social = SocialActivity.valueOf(binding.socialActivitySpinner.selectedItem.toString().uppercase()),
+                hobby = Hobby.valueOf(binding.hobbySpinner.selectedItem.toString().uppercase()),
+                food = FoodType.valueOf(binding.foodTypeSpinner.selectedItem.toString().replace(" ", "_").uppercase()),
+                timestamp = timestamp
             )
 
             app.moods.add(mood)
-            i("Mood Added: $mood")
+            i("Mood Added at $timestamp: $mood")
+            for (i in app.moods.indices) {
+                i("Mood[$i]:${this.app.moods[i]}")
+            }
 
             Snackbar.make(binding.root, "Mood Added!", Snackbar.LENGTH_SHORT).show()
             setResult(RESULT_OK)
             finish()
         }
+
     }
 
     private fun setupSpinner(spinner: android.widget.Spinner, arrayRes: Int) {
