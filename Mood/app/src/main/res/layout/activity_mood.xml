@@ -1,102 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    tools:context="org.wit.mood.activities.MoodActivity">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
+        android:orientation="vertical">
 
-        <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/appBarLayout"
+        <Spinner
+            android:id="@+id/spinnerMoodType"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorAccent"
-            app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+            android:entries="@array/mood_types" />
 
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbarAdd"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:titleTextColor="@color/colorPrimary"/>
-        </com.google.android.material.appbar.AppBarLayout>
-
-        <ScrollView
+        <Spinner
+            android:id="@+id/spinnerSleep"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@id/appBarLayout">
+            android:layout_height="wrap_content"
+            android:entries="@array/sleep_quality" />
 
-            <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="16dp">
+        <Spinner
+            android:id="@+id/spinnerSocial"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/social_activity" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Select your mood:"
-                    android:textStyle="bold"
-                    android:textSize="16sp"
-                    android:layout_marginTop="8dp"/>
+        <Spinner
+            android:id="@+id/spinnerHobby"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/hobbies" />
 
-                <RadioGroup
-                    android:id="@+id/moodGroup"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginBottom="8dp">
+        <Spinner
+            android:id="@+id/spinnerFood"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/food_types" />
 
-                    <RadioButton
-                        android:id="@+id/moodHappy"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Happy" />
+        <EditText
+            android:id="@+id/editNote"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Add a note..."
+            android:inputType="text"
+            android:layout_marginTop="8dp"/>
 
-                    <RadioButton
-                        android:id="@+id/moodRelaxed"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Relaxed" />
+        <Button
+            android:id="@+id/btnAddMood"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Add Mood" />
 
-                    <RadioButton
-                        android:id="@+id/moodNeutral"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Neutral" />
-
-                    <RadioButton
-                        android:id="@+id/moodSad"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Sad" />
-
-                    <RadioButton
-                        android:id="@+id/moodAngry"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Angry" />
-                </RadioGroup>
-
-                <EditText
-                    android:id="@+id/note"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/hint_moodNote"
-                    android:layout_marginTop="8dp"/>
-
-
-                <Button
-                    android:id="@+id/btnAdd"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="@string/button_addMood"/>
-            </LinearLayout>
-        </ScrollView>
-    </RelativeLayout>
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+</ScrollView>
