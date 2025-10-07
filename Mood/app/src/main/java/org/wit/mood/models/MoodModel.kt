@@ -3,7 +3,7 @@ package org.wit.mood.models
 import java.time.LocalDateTime
 
 data class MoodModel(
-    var type: MoodType = MoodType.NEUTRAL,
+    var type: MoodType = MoodType.Neutral,
     var note: String = "",
     var sleep: SleepQuality = SleepQuality.MEDIUM,
     var social: SocialActivity = SocialActivity.NONE,
