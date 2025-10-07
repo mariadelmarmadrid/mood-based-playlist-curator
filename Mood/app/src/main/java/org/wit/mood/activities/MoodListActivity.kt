@@ -15,6 +15,7 @@ import org.wit.mood.databinding.ActivityMoodListBinding
 import org.wit.mood.databinding.CardMoodBinding
 import org.wit.mood.main.MainApp
 import org.wit.mood.models.MoodModel
+import timber.log.Timber.i
 
 class MoodListActivity : AppCompatActivity() {
 
@@ -32,7 +33,16 @@ class MoodListActivity : AppCompatActivity() {
 
         val layoutManager = LinearLayoutManager(this)
         binding.recyclerView.layoutManager = layoutManager
-        binding.recyclerView.adapter = MoodAdapter(app.moods)
+        binding.recyclerView.adapter = MoodAdapter(app.moods, onDeleteClick = { mood ->
+            app.moods.remove(mood)
+            binding.recyclerView.adapter?.notifyDataSetChanged()
+
+            i("Mood Deleted: $mood")
+            for (i in app.moods.indices) {
+                i("Mood[$i]:${this.app.moods[i]}")
+            }
+        })
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -60,8 +70,10 @@ class MoodListActivity : AppCompatActivity() {
         }
 }
 
-class MoodAdapter(private var moods: List<MoodModel>) :
-    RecyclerView.Adapter<MoodAdapter.MainHolder>() {
+class MoodAdapter(
+    private var moods: MutableList<MoodModel>,
+    private val onDeleteClick: (MoodModel) -> Unit
+) : RecyclerView.Adapter<MoodAdapter.MainHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MainHolder {
         val binding = CardMoodBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -70,7 +82,7 @@ class MoodAdapter(private var moods: List<MoodModel>) :
 
     override fun onBindViewHolder(holder: MainHolder, position: Int) {
         val mood = moods[holder.adapterPosition]
-        holder.bind(mood)
+        holder.bind(mood, onDeleteClick)
     }
 
     override fun getItemCount(): Int = moods.size
@@ -78,16 +90,18 @@ class MoodAdapter(private var moods: List<MoodModel>) :
     class MainHolder(private val binding: CardMoodBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(mood: MoodModel) {
+        fun bind(mood: MoodModel, onDeleteClick: (MoodModel) -> Unit) {
             binding.moodTitle.text = mood.type.label
             binding.moodTimestamp.text = mood.timestamp
             binding.note.text = mood.note
-
             binding.sleep.text = "🛌 ${mood.sleep.name.lowercase()}"
             binding.social.text = "👥 ${mood.social.name.lowercase()}"
             binding.hobby.text = "🎨 ${mood.hobby.name.lowercase()}"
             binding.food.text = "🍽️ ${mood.food.name.lowercase()}"
+
+            binding.btnDelete.setOnClickListener {
+                onDeleteClick(mood)
+            }
         }
     }
-
 }
