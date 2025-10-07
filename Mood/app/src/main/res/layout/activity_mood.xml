@@ -36,19 +36,59 @@
                 android:layout_height="wrap_content"
                 android:padding="16dp">
 
-                <EditText
-                    android:id="@+id/moodTitle"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Select your mood:"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:layout_marginTop="8dp"/>
+
+                <RadioGroup
+                    android:id="@+id/moodGroup"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:hint="@string/hint_moodTitle"
-                    android:inputType="text"
-                    android:maxLines="1"/>
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="8dp">
+
+                    <RadioButton
+                        android:id="@+id/moodHappy"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Happy" />
+
+                    <RadioButton
+                        android:id="@+id/moodRelaxed"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Relaxed" />
+
+                    <RadioButton
+                        android:id="@+id/moodNeutral"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Neutral" />
+
+                    <RadioButton
+                        android:id="@+id/moodSad"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Sad" />
+
+                    <RadioButton
+                        android:id="@+id/moodAngry"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Angry" />
+                </RadioGroup>
 
                 <EditText
                     android:id="@+id/note"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/hint_moodNote"/>
+                    android:hint="@string/hint_moodNote"
+                    android:layout_marginTop="8dp"/>
+
 
                 <Button
                     android:id="@+id/btnAdd"
