@@ -57,6 +57,12 @@ class MoodActivity : AppCompatActivity() {
             finish()
         }
 
+        binding.btnCancel.setOnClickListener {
+            i("Mood creation canceled by user.")
+            finish()
+        }
+
+
     }
 
     private fun setupSpinner(spinner: android.widget.Spinner, arrayRes: Int) {
