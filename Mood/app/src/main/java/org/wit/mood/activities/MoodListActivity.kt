@@ -100,8 +100,15 @@ class MoodAdapter(
             binding.food.text = "🍽️ ${mood.food.name.lowercase()}"
 
             binding.btnDelete.setOnClickListener {
-                onDeleteClick(mood)
+                val context = binding.root.context
+                android.app.AlertDialog.Builder(context)
+                    .setTitle("Delete Mood")
+                    .setMessage("Are you sure you want to delete this mood?")
+                    .setPositiveButton("Yes") { _, _ -> onDeleteClick(mood) }
+                    .setNegativeButton("No", null)
+                    .show()
             }
+
         }
     }
 }
