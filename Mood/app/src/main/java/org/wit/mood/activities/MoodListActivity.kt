@@ -33,39 +33,30 @@ class MoodListActivity : AppCompatActivity() {
 
         app = application as MainApp
 
-
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
-        moodAdapter = MoodAdapter(app.moods.findAll().toMutableList(), onDeleteClick = { mood ->
-            app.moods.delete(mood)
-            i("Mood Deleted: $mood")
 
-
-            app.moods.findAll().forEachIndexed { index, m ->
-                i("Mood[$index]: $m")
-            }
-
-            updateRecyclerView()
-        })
-        binding.recyclerView.adapter = moodAdapter
+        // Load daily summary cards
+        updateRecyclerView()
     }
+
 
     private fun getDailySummaries(): List<DailyMoodSummary> {
-        val grouped = app.moods.findAll().groupBy {
-            it.timestamp.substring(0, 10) // Extract "yyyy-MM-dd" part
-        }
+        val grouped = app.moods.findAll().groupBy { it.timestamp.substring(0, 10) }
 
         return grouped.map { (date, moods) ->
-            val avgScore = moods.map { it.type.score }.average()
+            val avgScore = if (moods.isNotEmpty()) moods.map { it.type.score }.average() else 0.0
             DailyMoodSummary(date, moods, avgScore)
-        }.sortedBy { it.date } // optional: sort by date
+        }.sortedByDescending { it.date } // optional: show newest first
     }
 
 
-    private fun updateRecyclerView() {
+
+    fun updateRecyclerView() {
         val summaries = getDailySummaries()
-        val dailyAdapter = DailyMoodAdapter(summaries)
+        val dailyAdapter = DailyMoodAdapter(summaries, app) // pass app
         binding.recyclerView.adapter = dailyAdapter
     }
+
 
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
