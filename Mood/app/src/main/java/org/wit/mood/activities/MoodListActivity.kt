@@ -14,6 +14,7 @@ import org.wit.mood.R
 import org.wit.mood.databinding.ActivityMoodListBinding
 import org.wit.mood.databinding.CardMoodBinding
 import org.wit.mood.main.MainApp
+import org.wit.mood.models.DailyMoodSummary
 import org.wit.mood.models.MoodModel
 import timber.log.Timber.i
 
@@ -32,13 +33,13 @@ class MoodListActivity : AppCompatActivity() {
 
         app = application as MainApp
 
-        // Set up RecyclerView
+
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
         moodAdapter = MoodAdapter(app.moods.findAll().toMutableList(), onDeleteClick = { mood ->
             app.moods.delete(mood)
             i("Mood Deleted: $mood")
 
-            // Log all remaining moods
+            
             app.moods.findAll().forEachIndexed { index, m ->
                 i("Mood[$index]: $m")
             }
@@ -47,6 +48,18 @@ class MoodListActivity : AppCompatActivity() {
         })
         binding.recyclerView.adapter = moodAdapter
     }
+
+    private fun getDailySummaries(): List<DailyMoodSummary> {
+        val grouped = app.moods.findAll().groupBy {
+            it.timestamp.substring(0, 10) // Extract "yyyy-MM-dd" part
+        }
+
+        return grouped.map { (date, moods) ->
+            val avgScore = moods.map { it.type.score }.average()
+            DailyMoodSummary(date, moods, avgScore)
+        }.sortedBy { it.date } // optional: sort by date
+    }
+
 
     private fun updateRecyclerView() {
         moodAdapter.updateMoods(app.moods.findAll())
