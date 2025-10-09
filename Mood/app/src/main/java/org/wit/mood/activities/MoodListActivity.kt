@@ -21,6 +21,7 @@ class MoodListActivity : AppCompatActivity() {
 
     lateinit var app: MainApp
     private lateinit var binding: ActivityMoodListBinding
+    private lateinit var moodAdapter: MoodAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,18 +32,25 @@ class MoodListActivity : AppCompatActivity() {
 
         app = application as MainApp
 
-        val layoutManager = LinearLayoutManager(this)
-        binding.recyclerView.layoutManager = layoutManager
-        binding.recyclerView.adapter = MoodAdapter(app.moods, onDeleteClick = { mood ->
-            app.moods.remove(mood)
-            binding.recyclerView.adapter?.notifyDataSetChanged()
-
+        // Set up RecyclerView
+        binding.recyclerView.layoutManager = LinearLayoutManager(this)
+        moodAdapter = MoodAdapter(app.moods.findAll().toMutableList(), onDeleteClick = { mood ->
+            app.moods.delete(mood)
             i("Mood Deleted: $mood")
-            for (i in app.moods.indices) {
-                i("Mood[$i]:${this.app.moods[i]}")
-            }
-        })
 
+            // Log all remaining moods
+            app.moods.findAll().forEachIndexed { index, m ->
+                i("Mood[$index]: $m")
+            }
+
+            updateRecyclerView()
+        })
+        binding.recyclerView.adapter = moodAdapter
+    }
+
+    private fun updateRecyclerView() {
+        moodAdapter.updateMoods(app.moods.findAll())
+        binding.recyclerView.scrollToPosition(app.moods.findAll().size - 1)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -65,13 +73,13 @@ class MoodListActivity : AppCompatActivity() {
             ActivityResultContracts.StartActivityForResult()
         ) {
             if (it.resultCode == RESULT_OK) {
-                binding.recyclerView.adapter?.notifyItemRangeChanged(0, app.moods.size)
+                updateRecyclerView()
             }
         }
 }
 
 class MoodAdapter(
-    private var moods: MutableList<MoodModel>,
+    private val moods: MutableList<MoodModel>,
     private val onDeleteClick: (MoodModel) -> Unit
 ) : RecyclerView.Adapter<MoodAdapter.MainHolder>() {
 
@@ -86,6 +94,12 @@ class MoodAdapter(
     }
 
     override fun getItemCount(): Int = moods.size
+
+    fun updateMoods(newMoods: List<MoodModel>) {
+        moods.clear()
+        moods.addAll(newMoods)
+        notifyDataSetChanged()
+    }
 
     class MainHolder(private val binding: CardMoodBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -108,7 +122,6 @@ class MoodAdapter(
                     .setNegativeButton("No", null)
                     .show()
             }
-
         }
     }
 }

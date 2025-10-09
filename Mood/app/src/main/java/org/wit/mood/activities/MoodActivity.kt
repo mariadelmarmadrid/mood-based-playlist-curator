@@ -46,10 +46,10 @@ class MoodActivity : AppCompatActivity() {
                 timestamp = timestamp
             )
 
-            app.moods.add(mood)
+            app.moods.create(mood)
             i("Mood Added at $timestamp: $mood")
-            for (i in app.moods.indices) {
-                i("Mood[$i]:${this.app.moods[i]}")
+            app.moods.findAll().forEachIndexed { index, m ->
+                i("Mood[$index]: $m")
             }
 
             Snackbar.make(binding.root, "Mood Added!", Snackbar.LENGTH_SHORT).show()
