@@ -39,7 +39,7 @@ class MoodListActivity : AppCompatActivity() {
             app.moods.delete(mood)
             i("Mood Deleted: $mood")
 
-            
+
             app.moods.findAll().forEachIndexed { index, m ->
                 i("Mood[$index]: $m")
             }
