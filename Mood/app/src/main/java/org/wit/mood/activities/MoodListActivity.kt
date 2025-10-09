@@ -62,9 +62,11 @@ class MoodListActivity : AppCompatActivity() {
 
 
     private fun updateRecyclerView() {
-        moodAdapter.updateMoods(app.moods.findAll())
-        binding.recyclerView.scrollToPosition(app.moods.findAll().size - 1)
+        val summaries = getDailySummaries()
+        val dailyAdapter = DailyMoodAdapter(summaries)
+        binding.recyclerView.adapter = dailyAdapter
     }
+
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
