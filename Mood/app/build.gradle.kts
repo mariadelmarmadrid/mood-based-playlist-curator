@@ -49,6 +49,8 @@ dependencies {
 
     implementation(libs.timber)
     implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.google.android.flexbox:flexbox:3.0.0")
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
