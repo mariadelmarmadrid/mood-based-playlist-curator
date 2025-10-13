@@ -47,7 +47,7 @@ class DailyMoodAdapter(
             summary.moods.sortedByDescending { it.timestamp }.forEach { mood ->
                 // 1. Inflate your custom layout: card_mood.xml
                 val moodView = inflater.inflate(
-                    org.wit.mood.R.layout.card_mood, // <-- USE YOUR CUSTOM LAYOUT HERE
+                    org.wit.mood.R.layout.card_mood,
                     binding.moodsContainer,
                     false
                 )
@@ -65,7 +65,7 @@ class DailyMoodAdapter(
                 // Populate data
                 val time = mood.timestamp.substring(11, 16)
                 title.text = mood.type.label
-                timestamp.text = time // The full timestamp is too long, using just time
+                timestamp.text = time
                 note.text = mood.note
                 // Populate your detail TextViews separately to use the FlexboxLayout
                 sleep.text = "🛌 ${mood.sleep.name.lowercase()}"
@@ -73,19 +73,29 @@ class DailyMoodAdapter(
                 hobby.text = "🎨 ${mood.hobby.name.lowercase()}"
                 food.text = "🍽️ ${mood.food.name.lowercase()}"
 
-                // 3. Set up the delete button logic on the newly inflated moodView's button
+                // 3. Set up the delete button logic with confirmation dialog
                 deleteButton.setOnClickListener {
-                    // ... (Your existing delete logic remains the same)
-                    app.moods.delete(mood)
-                    Timber.i("Mood Deleted: $mood")
-                    if (bindingAdapterPosition != RecyclerView.NO_POSITION) {
-                        (binding.root.context as? androidx.appcompat.app.AppCompatActivity)
-                            ?.let { activity ->
-                                if (activity is org.wit.mood.activities.MoodListActivity) {
-                                    activity.updateRecyclerView()
-                                }
+                    val context = binding.root.context
+                    android.app.AlertDialog.Builder(context)
+                        .setTitle("Delete Mood")
+                        .setMessage("Are you sure you want to delete this mood?")
+                        .setPositiveButton("Yes") { _, _ ->
+                            // Delete action confirmed
+                            app.moods.delete(mood)
+                            Timber.i("Mood Deleted: $mood")
+
+                            // Refresh RecyclerView
+                            if (bindingAdapterPosition != RecyclerView.NO_POSITION) {
+                                (binding.root.context as? androidx.appcompat.app.AppCompatActivity)
+                                    ?.let { activity ->
+                                        if (activity is org.wit.mood.activities.MoodListActivity) {
+                                            activity.updateRecyclerView()
+                                        }
+                                    }
                             }
-                    }
+                        }
+                        .setNegativeButton("No", null) // Do nothing on 'No'
+                        .show()
                 }
 
                 // 4. Add the correctly formatted view to the container
