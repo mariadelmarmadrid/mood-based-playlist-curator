@@ -45,67 +45,54 @@ class DailyMoodAdapter(
             val inflater = LayoutInflater.from(binding.root.context)
 
             summary.moods.sortedByDescending { it.timestamp }.forEach { mood ->
-                // Container for mood + delete button
-                val container = LinearLayout(binding.root.context).apply {
-                    orientation = LinearLayout.HORIZONTAL
-                    layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                    )
-                }
-
-                // Inflate mood view (title + subtitle)
+                // 1. Inflate your custom layout: card_mood.xml
                 val moodView = inflater.inflate(
-                    android.R.layout.simple_list_item_2,
+                    org.wit.mood.R.layout.card_mood, // <-- USE YOUR CUSTOM LAYOUT HERE
                     binding.moodsContainer,
                     false
                 )
-                val title = moodView.findViewById<TextView>(android.R.id.text1)
-                val subtitle = moodView.findViewById<TextView>(android.R.id.text2)
 
+                // 2. Populate the views from your custom card_mood.xml
+                val title = moodView.findViewById<TextView>(org.wit.mood.R.id.moodTitle)
+                val timestamp = moodView.findViewById<TextView>(org.wit.mood.R.id.moodTimestamp)
+                val note = moodView.findViewById<TextView>(org.wit.mood.R.id.note)
+                val sleep = moodView.findViewById<TextView>(org.wit.mood.R.id.sleep)
+                val social = moodView.findViewById<TextView>(org.wit.mood.R.id.social)
+                val hobby = moodView.findViewById<TextView>(org.wit.mood.R.id.hobby)
+                val food = moodView.findViewById<TextView>(org.wit.mood.R.id.food)
+                val deleteButton = moodView.findViewById<Button>(org.wit.mood.R.id.btnDelete)
+
+                // Populate data
                 val time = mood.timestamp.substring(11, 16)
-                title.text = "${mood.type.label}  •  $time"
-                subtitle.text =
-                    "${mood.note}\n🛌 ${mood.sleep.name.lowercase()} | 👥 ${mood.social.name.lowercase()} | 🎨 ${mood.hobby.name.lowercase()} | 🍽️ ${mood.food.name.lowercase()}"
+                title.text = mood.type.label
+                timestamp.text = time // The full timestamp is too long, using just time
+                note.text = mood.note
+                // Populate your detail TextViews separately to use the FlexboxLayout
+                sleep.text = "🛌 ${mood.sleep.name.lowercase()}"
+                social.text = "👥 ${mood.social.name.lowercase()}"
+                hobby.text = "🎨 ${mood.hobby.name.lowercase()}"
+                food.text = "🍽️ ${mood.food.name.lowercase()}"
 
-                // Add mood view to container (weight=1 to fill remaining space)
-                container.addView(
-                    moodView,
-                    LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-                )
-
-                // Create delete button
-                val deleteButton = Button(binding.root.context).apply {
-                    text = "Delete"
-                    setOnClickListener {
-                        // Delete mood from store
-                        app.moods.delete(mood)
-
-                        // Log to Logcat
-                        Timber.i("Mood Deleted: $mood")
-                        app.moods.findAll().forEachIndexed { index, m ->
-                            Timber.i("Mood[$index]: $m")
-                        }
-
-                        // Refresh RecyclerView
-                        if (bindingAdapterPosition != RecyclerView.NO_POSITION) {
-                            (binding.root.context as? androidx.appcompat.app.AppCompatActivity)
-                                ?.let { activity ->
-                                    if (activity is org.wit.mood.activities.MoodListActivity) {
-                                        activity.updateRecyclerView()
-                                    }
+                // 3. Set up the delete button logic on the newly inflated moodView's button
+                deleteButton.setOnClickListener {
+                    // ... (Your existing delete logic remains the same)
+                    app.moods.delete(mood)
+                    Timber.i("Mood Deleted: $mood")
+                    if (bindingAdapterPosition != RecyclerView.NO_POSITION) {
+                        (binding.root.context as? androidx.appcompat.app.AppCompatActivity)
+                            ?.let { activity ->
+                                if (activity is org.wit.mood.activities.MoodListActivity) {
+                                    activity.updateRecyclerView()
                                 }
-                        }
+                            }
                     }
                 }
 
-                container.addView(deleteButton)
-
-                // Add container to moodsContainer
-                binding.moodsContainer.addView(container)
+                // 4. Add the correctly formatted view to the container
+                binding.moodsContainer.addView(moodView)
             }
 
-            // Recalculate average mood for this day
+            // Recalculate average mood for this day (rest of your existing code)
             val avgScore = if (summary.moods.isNotEmpty())
                 summary.moods.map { it.type.score }.average() else 0.0
             val avgMoodLabel = when {
