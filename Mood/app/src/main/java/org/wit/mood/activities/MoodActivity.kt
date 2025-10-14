@@ -11,6 +11,8 @@ import timber.log.Timber.i
 import java.time.LocalDateTime
 import org.wit.mood.R
 import java.time.format.DateTimeFormatter
+import android.widget.RadioButton
+
 
 class MoodActivity : AppCompatActivity() {
 
@@ -25,7 +27,6 @@ class MoodActivity : AppCompatActivity() {
         app = application as MainApp
         i("Mood Activity started...")
 
-        setupSpinner(binding.moodTypeSpinner, R.array.mood_types)
         setupSpinner(binding.sleepQualitySpinner, R.array.sleep_quality)
         setupSpinner(binding.socialActivitySpinner, R.array.social_activity)
         setupSpinner(binding.hobbySpinner, R.array.hobbies)
@@ -36,8 +37,21 @@ class MoodActivity : AppCompatActivity() {
             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
             val timestamp = current.format(formatter)
 
+            val selectedMoodId = binding.moodRadioGroup.checkedRadioButtonId
+            if (selectedMoodId == -1) {
+                Snackbar.make(binding.root, "Please select a mood!", Snackbar.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val selectedMoodButton = findViewById<RadioButton>(selectedMoodId)
+            val moodType = MoodType.values().firstOrNull { it.label == selectedMoodButton.text.toString() }
+            if (moodType == null) {
+                Snackbar.make(binding.root, "Invalid mood selected!", Snackbar.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             val mood = MoodModel(
-                type = MoodType.valueOf(binding.moodTypeSpinner.selectedItem.toString().uppercase()),
+                type = moodType,
                 note = binding.note.text.toString(),
                 sleep = SleepQuality.valueOf(binding.sleepQualitySpinner.selectedItem.toString().uppercase()),
                 social = SocialActivity.valueOf(binding.socialActivitySpinner.selectedItem.toString().uppercase()),
