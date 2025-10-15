@@ -11,6 +11,17 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <TextView
+            android:id="@+id/labelSelectMood"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_select_mood"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"
+            android:layout_gravity="center_horizontal" />
+
+
         <!-- Moods section -->
         <LinearLayout
             android:layout_width="match_parent"
