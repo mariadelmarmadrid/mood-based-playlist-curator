@@ -5,4 +5,13 @@
     <color name="colorPrimary">#FFFFFF</color>
     <color name="colorPrimaryDark">#000000</color>
     <color name="colorAccent">#026E8E</color>
+    <color name="chip_bg_transparent">#00FFFFFF</color>
+
+    <color name="mood_icon_default">#B0B0B0</color>
+    <color name="mood_happy">#22C55E</color>
+    <color name="mood_relaxed">#34D399</color>
+    <color name="mood_neutral">#9CA3AF</color>
+    <color name="mood_sad">#60A5FA</color>
+    <color name="mood_angry">#EF4444</color>
+
 </resources>
