@@ -1,11 +1,14 @@
-package org.wit.mood.activities
+package org.wit.mood.adapters
 
+import android.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
+import org.wit.mood.R
+import org.wit.mood.activities.MoodListActivity
 import org.wit.mood.databinding.CardDailySummaryBinding
 import org.wit.mood.main.MainApp
 import org.wit.mood.models.DailyMoodSummary
@@ -47,20 +50,20 @@ class DailyMoodAdapter(
             summary.moods.sortedByDescending { it.timestamp }.forEach { mood ->
                 // 1. Inflate your custom layout: card_mood.xml
                 val moodView = inflater.inflate(
-                    org.wit.mood.R.layout.card_mood,
+                    R.layout.card_mood,
                     binding.moodsContainer,
                     false
                 )
 
                 // 2. Populate the views from your custom card_mood.xml
-                val title = moodView.findViewById<TextView>(org.wit.mood.R.id.moodTitle)
-                val timestamp = moodView.findViewById<TextView>(org.wit.mood.R.id.moodTimestamp)
-                val note = moodView.findViewById<TextView>(org.wit.mood.R.id.note)
-                val sleep = moodView.findViewById<TextView>(org.wit.mood.R.id.sleep)
-                val social = moodView.findViewById<TextView>(org.wit.mood.R.id.social)
-                val hobby = moodView.findViewById<TextView>(org.wit.mood.R.id.hobby)
-                val food = moodView.findViewById<TextView>(org.wit.mood.R.id.food)
-                val deleteButton = moodView.findViewById<Button>(org.wit.mood.R.id.btnDelete)
+                val title = moodView.findViewById<TextView>(R.id.moodTitle)
+                val timestamp = moodView.findViewById<TextView>(R.id.moodTimestamp)
+                val note = moodView.findViewById<TextView>(R.id.note)
+                val sleep = moodView.findViewById<TextView>(R.id.sleep)
+                val social = moodView.findViewById<TextView>(R.id.social)
+                val hobby = moodView.findViewById<TextView>(R.id.hobby)
+                val food = moodView.findViewById<TextView>(R.id.food)
+                val deleteButton = moodView.findViewById<Button>(R.id.btnDelete)
 
                 // Populate data
                 val time = mood.timestamp.substring(11, 16)
@@ -76,7 +79,7 @@ class DailyMoodAdapter(
                 // 3. Set up the delete button logic with confirmation dialog
                 deleteButton.setOnClickListener {
                     val context = binding.root.context
-                    android.app.AlertDialog.Builder(context)
+                    AlertDialog.Builder(context)
                         .setTitle("Delete Mood")
                         .setMessage("Are you sure you want to delete this mood?")
                         .setPositiveButton("Yes") { _, _ ->
@@ -86,9 +89,9 @@ class DailyMoodAdapter(
 
                             // Refresh RecyclerView
                             if (bindingAdapterPosition != RecyclerView.NO_POSITION) {
-                                (binding.root.context as? androidx.appcompat.app.AppCompatActivity)
+                                (binding.root.context as? AppCompatActivity)
                                     ?.let { activity ->
-                                        if (activity is org.wit.mood.activities.MoodListActivity) {
+                                        if (activity is MoodListActivity) {
                                             activity.updateRecyclerView()
                                         }
                                     }
