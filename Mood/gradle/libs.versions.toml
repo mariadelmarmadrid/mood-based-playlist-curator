@@ -10,6 +10,7 @@ material = "1.13.0"
 activity = "1.11.0"
 constraintlayout = "2.2.1"
 timber = "1.5.1"
+kotlinPlugin = "2.2.10"
 
 
 [libraries]
@@ -26,4 +27,4 @@ timber = { module = "com.github.ajalt:timberkt", version.ref = "timber" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-
+kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlinPlugin" }
