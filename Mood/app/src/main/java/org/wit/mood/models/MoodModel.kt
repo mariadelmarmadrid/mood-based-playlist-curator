@@ -1,8 +1,11 @@
 package org.wit.mood.models
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+@Parcelize
 data class MoodModel(
     var type: MoodType = MoodType.NEUTRAL,
     var note: String = "",
@@ -13,4 +16,4 @@ data class MoodModel(
     var timestamp: String = LocalDateTime.now().format(
         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
     )
-)
+) : Parcelable
