@@ -17,6 +17,8 @@
     <string name="menu_addMood">Add Mood</string>
     <string name="button_cancel">Cancel</string>
     <string name="button_delete">Delete</string>
+    <string name="update">Update Mood</string>
+
 
     <!-- Dropdown Options -->
     <string-array name="mood_types">
