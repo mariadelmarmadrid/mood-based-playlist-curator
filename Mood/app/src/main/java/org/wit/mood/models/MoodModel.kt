@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter
 
 @Parcelize
 data class MoodModel(
+    var id: Long = 0L,
     var type: MoodType = MoodType.NEUTRAL,
     var note: String = "",
     var sleep: SleepQuality = SleepQuality.MEDIUM,
