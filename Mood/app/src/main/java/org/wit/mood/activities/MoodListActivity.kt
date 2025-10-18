@@ -2,31 +2,26 @@ package org.wit.mood.activities
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import org.wit.mood.R
-import org.wit.mood.adapters.MoodAdapter // only if you use flat list somewhere
+import org.wit.mood.adapters.DailyMoodAdapter
+import org.wit.mood.adapters.MoodListener
 import org.wit.mood.databinding.ActivityMoodListBinding
 import org.wit.mood.main.MainApp
 import org.wit.mood.models.DailyMoodSummary
 import org.wit.mood.models.MoodModel
-import org.wit.mood.adapters.DailyMoodAdapter   // ← your grouped-by-day adapter
-import org.wit.mood.adapters.MoodListener
 import timber.log.Timber.i
 
 class MoodListActivity : AppCompatActivity(), MoodListener {
 
-    lateinit var app: MainApp
+    private lateinit var app: MainApp
     private lateinit var binding: ActivityMoodListBinding
 
     private val getResult =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (it.resultCode == RESULT_OK) {
-                updateRecyclerView()
-            }
+            if (it.resultCode == RESULT_OK) updateRecyclerView()
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,66 +29,65 @@ class MoodListActivity : AppCompatActivity(), MoodListener {
         binding = ActivityMoodListBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.toolbar.title = title
-        setSupportActionBar(binding.toolbar)
-
         app = application as MainApp
 
+        // --- RecyclerView ---
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
-
         updateRecyclerView()
-    }
 
-    // ---- Toolbar menu (add new mood) ----
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return super.onCreateOptionsMenu(menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.item_add -> {
-                val intent = Intent(this, MoodActivity::class.java)
-                getResult.launch(intent)
-                true
+        // --- Bottom Nav ---
+        binding.bottomNav.selectedItemId = R.id.nav_home  // default selected tab
+        binding.bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    // Already here – keep selected state
+                    true
+                }
+                R.id.nav_chart -> {
+                    // TODO: open Insights screen when you add it
+                    // startActivity(Intent(this, InsightsActivity::class.java))
+                    true
+                }
+                else -> false
             }
-            else -> super.onOptionsItemSelected(item)
+        }
+
+        // --- FAB → Add new mood ---
+        binding.fabAdd.setOnClickListener {
+            val intent = Intent(this, MoodActivity::class.java)
+            getResult.launch(intent)
         }
     }
 
-    // ---- Click from adapter: open editor with selected mood ----
+    // From adapter: edit an existing mood
     override fun onMoodClick(mood: MoodModel) {
-        val intent = Intent(this, MoodActivity::class.java)
-        intent.putExtra("mood_edit", mood)  // Parcelable MoodModel
+        val intent = Intent(this, MoodActivity::class.java).apply {
+            putExtra("mood_edit", mood)
+        }
         getResult.launch(intent)
     }
 
-    // ---- Build & render daily summaries ----
+    // Build & render daily summaries
     private fun updateRecyclerView() {
         val summaries = getDailySummaries()
-        // DailyMoodAdapter should accept a MoodListener and call onMoodClick(mood) for item taps
-        val adapter = DailyMoodAdapter(
+        binding.recyclerView.adapter = DailyMoodAdapter(
             days = summaries,
             app = app,
-            listener = this
-        ) {
-            updateRecyclerView()
-        }
-        binding.recyclerView.adapter = adapter
-
+            listener = this,
+            onDataChanged = { updateRecyclerView() } // refresh after delete/update
+        )
         i("Recycler updated with ${summaries.size} daily summaries")
     }
 
     private fun getDailySummaries(): List<DailyMoodSummary> {
         val all = app.moods.findAll()
-        val grouped = all.groupBy { it.timestamp.take(10) } // yyyy-MM-dd
+        val grouped = all.groupBy { it.timestamp.take(10) } // yyyy-MM-dd per-day
 
         return grouped.map { (date, moods) ->
-            // sort moods within a day by timestamp desc
-            val moodsSorted = moods.sortedByDescending { it.timestamp } // works with "yyyy-MM-dd HH:mm:ss"
-            val avgScore = if (moodsSorted.isNotEmpty()) moodsSorted.map { it.type.score }.average() else 0.0
+            val moodsSorted = moods.sortedByDescending { it.timestamp } // newest first in the day
+            val avgScore = if (moodsSorted.isNotEmpty())
+                moodsSorted.map { it.type.score }.average() else 0.0
             DailyMoodSummary(date = date, moods = moodsSorted, averageScore = avgScore)
         }.sortedByDescending { it.date } // newest day first
     }
-
 }
