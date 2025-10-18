@@ -1,7 +1,9 @@
 package org.wit.mood.adapters
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import org.wit.mood.databinding.CardDailySummaryBinding
 import org.wit.mood.main.MainApp
@@ -35,11 +37,10 @@ class DailyMoodAdapter(
             day: DailyMoodSummary,
             app: MainApp,
             listener: MoodListener,
-            onDataChanged: () -> Unit                    // ← receive it here
+            onDataChanged: () -> Unit
         ) {
             binding.dateText.text = day.date
 
-            // Average as mood label
             val avgScore = if (day.moods.isNotEmpty())
                 day.moods.map { it.type.score }.average()
             else 0.0
@@ -53,7 +54,6 @@ class DailyMoodAdapter(
             }
             binding.averageMood.text = "Average Mood: $avgMoodLabel"
 
-            // Clear + add mood cards
             binding.moodsContainer.removeAllViews()
             val inflater = LayoutInflater.from(binding.root.context)
 
@@ -62,12 +62,14 @@ class DailyMoodAdapter(
                     .inflate(inflater, binding.moodsContainer, false)
 
                 moodView.moodTitle.text = mood.type.label
-                moodView.moodTimestamp.text = onlyTime(mood.timestamp) // ← time only (HH:mm)
+                moodView.moodTimestamp.text = onlyTime(mood.timestamp)
                 moodView.note.text = mood.note
-                moodView.sleep.text = "🛌 ${mood.sleep.name.lowercase()}"
-                moodView.social.text = "👥 ${mood.social.name.lowercase()}"
-                moodView.hobby.text = "🎨 ${mood.hobby.name.lowercase()}"
-                moodView.food.text = "🍽️ ${mood.food.name.lowercase()}"
+
+                // ✅ Show rows only if selected (non-null)
+                setRow(moodView.sleep, "🛌", mood.sleep)
+                setRow(moodView.social, "👥", mood.social)
+                setRow(moodView.hobby, "🎨", mood.hobby)
+                setRow(moodView.food,  "🍽️", mood.food)
 
                 moodView.root.setOnClickListener { listener.onMoodClick(mood) }
 
@@ -77,8 +79,8 @@ class DailyMoodAdapter(
                         .setTitle("Delete Mood")
                         .setMessage("Are you sure you want to delete this mood?")
                         .setPositiveButton("Yes") { _, _ ->
-                            app.moods.delete(mood)   // ensure delete uses id + serialize()
-                            onDataChanged()          // ← trigger list refresh
+                            app.moods.delete(mood)
+                            onDataChanged()
                         }
                         .setNegativeButton("No", null)
                         .show()
@@ -88,7 +90,24 @@ class DailyMoodAdapter(
             }
         }
 
+
+        // Helpers in DayHolder
         private fun onlyTime(ts: String): String =
-            if (ts.length >= 16) ts.substring(11, 16) else ts // "yyyy-MM-dd HH:mm:ss" → "HH:mm"
+            if (ts.length >= 16) ts.substring(11, 16) else ts
+
+        private fun <E : Enum<*>> setRow(view: TextView, emoji: String, value: E?) {
+            if (value == null) {
+                view.visibility = View.GONE
+            } else {
+                view.text = "$emoji ${value.name.prettyEnumLabel()}"
+                view.visibility = View.VISIBLE
+            }
+        }
+
+        // Title-case + spaces for enum names, e.g. FAST_FOOD -> "Fast Food"
+        private fun String.prettyEnumLabel(): String =
+            lowercase().replace('_', ' ')
+                .split(' ')
+                .joinToString(" ") { it.replaceFirstChar { c -> c.titlecase() } }
     }
 }

@@ -1,7 +1,9 @@
 package org.wit.mood.adapters
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import org.wit.mood.databinding.CardMoodBinding
 import org.wit.mood.models.MoodModel
@@ -23,7 +25,7 @@ class MoodAdapter(
 
     override fun onBindViewHolder(holder: MainHolder, position: Int) {
         val mood = moods[holder.adapterPosition]
-        holder.bind(mood, listener, onDeleteClick)   // ← pass listener here
+        holder.bind(mood, listener, onDeleteClick)
     }
 
     override fun getItemCount(): Int = moods.size
@@ -43,16 +45,19 @@ class MoodAdapter(
             onDeleteClick: (MoodModel) -> Unit
         ) {
             binding.moodTitle.text = mood.type.label
-            binding.moodTimestamp.text = mood.timestamp
+            binding.moodTimestamp.text = onlyTime(mood.timestamp) // show HH:mm only
             binding.note.text = mood.note
-            binding.sleep.text = "🛌 ${mood.sleep.name.lowercase()}"
-            binding.social.text = "👥 ${mood.social.name.lowercase()}"
-            binding.hobby.text = "🎨 ${mood.hobby.name.lowercase()}"
-            binding.food.text = "🍽️ ${mood.food.name.lowercase()}"
 
-            // Row click → notify activity/fragment
+            // Show each detail only if present (nullable-safe)
+            setRow(binding.sleep, "🛌",  mood.sleep)
+            setRow(binding.social, "👥", mood.social)
+            setRow(binding.hobby, "🎨",  mood.hobby)
+            setRow(binding.food,  "🍽️",  mood.food)
+
+            // Row click → edit
             binding.root.setOnClickListener { listener.onMoodClick(mood) }
 
+            // Delete with confirm dialog
             binding.btnDelete.setOnClickListener {
                 val context = binding.root.context
                 android.app.AlertDialog.Builder(context)
@@ -63,5 +68,24 @@ class MoodAdapter(
                     .show()
             }
         }
+
+        private fun onlyTime(ts: String): String =
+            if (ts.length >= 16) ts.substring(11, 16) else ts // "yyyy-MM-dd HH:mm:ss" → "HH:mm"
+
+        // Hide view if value is null; pretty-print enum names if present
+        private fun <E : Enum<*>> setRow(view: TextView, emoji: String, value: E?) {
+            if (value == null) {
+                view.visibility = View.GONE
+            } else {
+                view.text = "$emoji ${value.name.prettyEnumLabel()}"
+                view.visibility = View.VISIBLE
+            }
+        }
+
+        // FAST_FOOD -> "Fast Food"
+        private fun String.prettyEnumLabel(): String =
+            lowercase().replace('_', ' ')
+                .split(' ')
+                .joinToString(" ") { it.replaceFirstChar { c -> c.titlecase() } }
     }
 }

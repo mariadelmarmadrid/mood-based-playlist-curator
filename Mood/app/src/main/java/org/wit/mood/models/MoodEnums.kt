@@ -8,16 +8,7 @@ enum class MoodType(val label: String, val score: Int) {
     ANGRY("Angry 😠", -2);
 }
 
-
 enum class SleepQuality { GOOD, MEDIUM, POOR }
-enum class SocialActivity { FAMILY, FRIENDS, DATE, PARTY, NONE }
-enum class Hobby { MOVIES, READING, GAMES, SPORT, RELAXATION, NONE }
-enum class FoodType {
-    HEALTHY,
-    FAST_FOOD,
-    HOMEMADE,
-    RESTAURANT,
-    NO_SUGAR,
-    NONE
-}
-
+enum class SocialActivity { FAMILY, FRIENDS, DATE, PARTY }
+enum class Hobby { MOVIES, READING, GAMES, SPORT, RELAXATION }
+enum class FoodType { HEALTHY, FAST_FOOD, HOMEMADE, RESTAURANT, NO_SUGAR }

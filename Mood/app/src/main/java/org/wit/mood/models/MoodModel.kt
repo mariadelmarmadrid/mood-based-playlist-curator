@@ -10,10 +10,13 @@ data class MoodModel(
     var id: Long = 0L,
     var type: MoodType = MoodType.NEUTRAL,
     var note: String = "",
-    var sleep: SleepQuality = SleepQuality.MEDIUM,
-    var social: SocialActivity = SocialActivity.NONE,
-    var hobby: Hobby = Hobby.NONE,
-    var food: FoodType = FoodType.NONE,
+
+    // nullable to support "no selection"
+    var sleep: SleepQuality? = null,
+    var social: SocialActivity? = null,
+    var hobby: Hobby? = null,
+    var food: FoodType? = null,
+
     var timestamp: String = LocalDateTime.now().format(
         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
     )

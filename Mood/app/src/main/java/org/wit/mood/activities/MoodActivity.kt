@@ -1,9 +1,9 @@
 package org.wit.mood.activities
 
 import android.os.Bundle
-import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import com.google.android.material.snackbar.Snackbar
 import org.wit.mood.R
 import org.wit.mood.databinding.ActivityMoodBinding
@@ -18,7 +18,7 @@ class MoodActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMoodBinding
     private lateinit var app: MainApp
 
-    // When not null, we are editing an existing mood
+    // If not null, we're editing
     private var editingMood: MoodModel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,13 +29,7 @@ class MoodActivity : AppCompatActivity() {
         app = application as MainApp
         i("Mood Activity started…")
 
-        // Spinners
-        setupSpinner(binding.sleepQualitySpinner, R.array.sleep_quality)
-        setupSpinner(binding.socialActivitySpinner, R.array.social_activity)
-        setupSpinner(binding.hobbySpinner, R.array.hobbies)
-        setupSpinner(binding.foodTypeSpinner, R.array.food_types)
-
-        // Wire single-selection behavior for standalone Chips (no ChipGroup in this layout)
+        // Make the 5 emoji chips behave like a single-selection group
         wireSingleSelectChips(
             binding.chipHappy,
             binding.chipRelaxed,
@@ -44,12 +38,13 @@ class MoodActivity : AppCompatActivity() {
             binding.chipAngry
         )
 
-        // Default selection (Neutral) for new entries
+        // Default: Neutral for new entries
         binding.chipNeutral.isChecked = true
 
-        // EDIT MODE: if a mood was passed in, prefill UI and change button text
+        // --- EDIT MODE ---
         editingMood = intent.getParcelableExtra("mood_edit")
         editingMood?.let { m ->
+            // Select main mood chip
             when (m.type) {
                 MoodType.HAPPY   -> binding.chipHappy.isChecked = true
                 MoodType.RELAXED -> binding.chipRelaxed.isChecked = true
@@ -58,20 +53,21 @@ class MoodActivity : AppCompatActivity() {
                 MoodType.ANGRY   -> binding.chipAngry.isChecked = true
             }
 
-            binding.note.setText(m.note)
-            binding.sleepQualitySpinner.setSelection(m.sleep.ordinal)
-            binding.socialActivitySpinner.setSelection(m.social.ordinal)
-            binding.hobbySpinner.setSelection(m.hobby.ordinal)
-            binding.foodTypeSpinner.setSelection(m.food.ordinal)
+            // Prefill optional detail groups (only if value present)
+            selectChipByText(binding.sleepChipGroup,   m.sleep?.name?.lowercase()?.replaceFirstChar { it.uppercase() })
+            selectChipByText(binding.socialChipGroup,  m.social?.name?.lowercase()?.replaceFirstChar { it.uppercase() })
+            selectChipByText(binding.hobbyChipGroup,   m.hobby?.name?.lowercase()?.replaceFirstChar { it.uppercase() })
+            selectChipByText(binding.foodChipGroup,    m.food?.name?.lowercase()?.replace('_',' ')?.replaceFirstChar { it.uppercase() })
 
-            binding.btnAdd.text = getString(R.string.update) // add "Update Mood" in strings.xml if you prefer
+            binding.note.setText(m.note)
+            binding.btnAdd.text = getString(R.string.update)
         }
 
         binding.btnAdd.setOnClickListener { onSaveClicked() }
         binding.btnCancel.setOnClickListener { finish() }
     }
 
-    // ---------- UI Actions ----------
+    // ---------- Actions ----------
 
     private fun onSaveClicked() {
         val selectedType = selectedMoodTypeOrNull()
@@ -80,28 +76,14 @@ class MoodActivity : AppCompatActivity() {
             return
         }
 
-        val sleep = enumOrDefault(
-            binding.sleepQualitySpinner.selectedItem?.toString(),
-            default = SleepQuality.MEDIUM
-        ) { it.uppercase() }
-
-        val social = enumOrDefault(
-            binding.socialActivitySpinner.selectedItem?.toString(),
-            default = SocialActivity.NONE
-        ) { it.uppercase() }
-
-        val hobby = enumOrDefault(
-            binding.hobbySpinner.selectedItem?.toString(),
-            default = Hobby.NONE
-        ) { it.uppercase() }
-
-        val food = enumOrDefault(
-            binding.foodTypeSpinner.selectedItem?.toString(),
-            default = FoodType.NONE
-        ) { it.replace(" ", "_").uppercase() }
+        // Read OPTIONAL details (null when nothing chosen)
+        val sleep  = sleepFromChip(  selectedChipText(binding.sleepChipGroup))
+        val social = socialFromChip( selectedChipText(binding.socialChipGroup))
+        val hobby  = hobbyFromChip(  selectedChipText(binding.hobbyChipGroup))
+        val food   = foodFromChip(   selectedChipText(binding.foodChipGroup))
 
         if (editingMood == null) {
-            // CREATE new mood
+            // CREATE
             val timestamp = LocalDateTime.now()
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
 
@@ -118,15 +100,15 @@ class MoodActivity : AppCompatActivity() {
             i("Mood created: $newMood")
             Snackbar.make(binding.root, "Mood added!", Snackbar.LENGTH_SHORT).show()
         } else {
-            // UPDATE existing mood (preserve id; keep timestamp as-is or change if you want)
+            // UPDATE (preserve id + timestamp)
             val updated = editingMood!!.copy(
                 type = selectedType,
                 note = binding.note.text?.toString().orEmpty(),
                 sleep = sleep,
                 social = social,
                 hobby = hobby,
-                food = food
-                // timestamp = editingMood!!.timestamp // keep original timestamp; uncomment if you want to force keep
+                food = food,
+                timestamp = editingMood!!.timestamp
             )
             app.moods.update(updated)
             i("Mood updated: $updated")
@@ -139,20 +121,7 @@ class MoodActivity : AppCompatActivity() {
 
     // ---------- Helpers ----------
 
-    private fun setupSpinner(spinner: android.widget.Spinner, arrayRes: Int) {
-        ArrayAdapter.createFromResource(
-            this,
-            arrayRes,
-            android.R.layout.simple_spinner_item
-        ).also { adapter ->
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinner.adapter = adapter
-        }
-    }
-
-    /**
-     * Make a group of Chips behave like a single-selection group (since we don’t have a ChipGroup).
-     */
+    /** Make a set of Chips behave like single-selection (since emoji chips are not in a ChipGroup). */
     private fun wireSingleSelectChips(vararg chips: Chip) {
         chips.forEach { chip ->
             chip.setOnCheckedChangeListener { button, isChecked ->
@@ -163,11 +132,7 @@ class MoodActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Determine the selected mood type by reading the tag of the checked chip.
-     * Each chip in your layout has android:tag like "Happy 😊", "Relaxed 😌", etc.
-     * MoodType.label should match those exact strings.
-     */
+    /** Returns the selected mood type based on the checked emoji chip’s tag/label. */
     private fun selectedMoodTypeOrNull(): MoodType? {
         val checkedChip = listOf(
             binding.chipHappy,
@@ -181,17 +146,37 @@ class MoodActivity : AppCompatActivity() {
         return MoodType.values().firstOrNull { it.label == labelFromTag }
     }
 
-    private inline fun <reified E : Enum<E>> enumOrDefault(
-        raw: String?,
-        default: E,
-        normalise: (String) -> String = { it }
-    ): E {
-        val text = raw?.trim().orEmpty()
-        if (text.isEmpty()) return default
-        return try {
-            java.lang.Enum.valueOf(E::class.java, normalise(text))
-        } catch (_: IllegalArgumentException) {
-            default
+    // ---- Your helpers: put them here (inside the Activity) ----
+
+    private fun selectedChipText(group: ChipGroup): String? {
+        val id = group.checkedChipId
+        if (id == -1) return null
+        val chip = group.findViewById<Chip>(id)
+        return chip?.text?.toString()
+    }
+
+    // mappers that return null if no selection
+    private fun sleepFromChip(text: String?): SleepQuality? =
+        text?.let { SleepQuality.valueOf(it.uppercase()) }
+
+    private fun socialFromChip(text: String?): SocialActivity? =
+        text?.let { SocialActivity.valueOf(it.uppercase()) }
+
+    private fun hobbyFromChip(text: String?): Hobby? =
+        text?.let { Hobby.valueOf(it.uppercase()) }
+
+    private fun foodFromChip(text: String?): FoodType? =
+        text?.let { FoodType.valueOf(it.replace(" ", "_").uppercase()) }
+
+    /** Helper to pre-select a chip in a group by its displayed text (case sensitive). */
+    private fun selectChipByText(group: ChipGroup, text: String?) {
+        if (text.isNullOrEmpty()) return
+        for (i in 0 until group.childCount) {
+            val chip = group.getChildAt(i) as? Chip ?: continue
+            if (chip.text.toString() == text) {
+                chip.isChecked = true
+                return
+            }
         }
     }
 }
