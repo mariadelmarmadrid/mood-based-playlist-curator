@@ -54,6 +54,7 @@ class MoodJSONStore(private val context: Context) : MoodStore {
         serialize()
     }
 
+
     private fun serialize() {
         val jsonString = gsonBuilder.toJson(moods, listType)
         context.openFileOutput(JSON_FILE, Context.MODE_PRIVATE).use {

@@ -72,17 +72,28 @@ class MoodListActivity : AppCompatActivity(), MoodListener {
     private fun updateRecyclerView() {
         val summaries = getDailySummaries()
         // DailyMoodAdapter should accept a MoodListener and call onMoodClick(mood) for item taps
-        val adapter = DailyMoodAdapter(summaries, app, listener = this)
+        val adapter = DailyMoodAdapter(
+            days = summaries,
+            app = app,
+            listener = this
+        ) {
+            updateRecyclerView()
+        }
         binding.recyclerView.adapter = adapter
+
         i("Recycler updated with ${summaries.size} daily summaries")
     }
 
     private fun getDailySummaries(): List<DailyMoodSummary> {
         val all = app.moods.findAll()
-        val grouped = all.groupBy { it.timestamp.take(10) } // "yyyy-MM-dd"
+        val grouped = all.groupBy { it.timestamp.take(10) } // yyyy-MM-dd
+
         return grouped.map { (date, moods) ->
-            val avgScore = if (moods.isNotEmpty()) moods.map { it.type.score }.average() else 0.0
-            DailyMoodSummary(date = date, moods = moods, averageScore = avgScore)
+            // sort moods within a day by timestamp desc
+            val moodsSorted = moods.sortedByDescending { it.timestamp } // works with "yyyy-MM-dd HH:mm:ss"
+            val avgScore = if (moodsSorted.isNotEmpty()) moodsSorted.map { it.type.score }.average() else 0.0
+            DailyMoodSummary(date = date, moods = moodsSorted, averageScore = avgScore)
         }.sortedByDescending { it.date } // newest day first
     }
+
 }
