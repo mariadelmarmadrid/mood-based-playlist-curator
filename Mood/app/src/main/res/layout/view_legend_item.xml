@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="72dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:paddingHorizontal="4dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="8dp">
+
+    <FrameLayout
+        android:layout_width="40dp"
+        android:layout_height="40dp">
+
+        <!-- Mood icon (outline/emoji/vector you already have) -->
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="4dp"
+            android:contentDescription="@null"
+            android:scaleType="fitCenter"/>
+
+        <!-- Badge -->
+        <TextView
+            android:id="@+id/badge"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_gravity="end|top"
+            android:gravity="center"
+            android:textColor="@android:color/white"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:minWidth="18dp"
+            android:minHeight="18dp"
+            android:background="@drawable/bg_badge_round" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:textSize="12sp"
+        android:textColor="@color/black"/>
+</LinearLayout>

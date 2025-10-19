@@ -97,13 +97,18 @@
                 android:textStyle="italic"
                 android:textColor="@color/black" />
 
-            <!-- Legend -->
-            <LinearLayout
+            <!-- Legend: icon + badge + label -->
+            <com.google.android.flexbox.FlexboxLayout
                 android:id="@+id/legend"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="12dp"/>
+                android:layout_marginTop="12dp"
+                app:flexWrap="wrap"
+                app:justifyContent="center"
+                app:alignItems="center"
+                app:showDividerHorizontal="none"
+                app:showDividerVertical="none"/>
+
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
