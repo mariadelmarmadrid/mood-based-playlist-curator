@@ -6,76 +6,108 @@
     android:layout_height="match_parent"
     android:background="@color/sand_50">
 
-    <!-- Content -->
-    <LinearLayout
-        android:orientation="vertical"
-        android:padding="16dp"
-        android:gravity="center_horizontal"
+    <!-- Card holding all content (bigger) -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/insightsCard"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="120dp">  <!-- leave room for bottom bar + FAB -->
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="120dp"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingTop="24dp"
+        android:paddingBottom="24dp"
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="24dp"
+        app:cardUseCompatPadding="true"
+        app:cardElevation="10dp">
 
-        <!-- Date + day navigation -->
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_marginBottom="8dp">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnPrevDay"
-                style="?attr/materialButtonOutlinedStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:icon="@drawable/ic_chevron_left_24"
-                android:text="Prev" />
-
-            <TextView
-                android:id="@+id/tvDate"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/black"
-                android:paddingHorizontal="8dp"/>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnNextDay"
-                style="?attr/materialButtonOutlinedStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:icon="@drawable/ic_chevron_right_24"
-                android:text="Next" />
-        </LinearLayout>
-
-        <!-- Mood Ring -->
-        <org.wit.mood.views.DailyMoodRingView
-            android:id="@+id/moodRing"
-            android:layout_width="280dp"
-            android:layout_height="280dp" />
-
-        <!-- Average label -->
-        <TextView
-            android:id="@+id/tvAverage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:textSize="16sp"
-            android:textStyle="italic"
-            android:textColor="@color/black" />
-
-        <!-- Legend -->
-        <LinearLayout
-            android:id="@+id/legend"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginTop="12dp"/>
-    </LinearLayout>
+            android:gravity="center_horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-    <!-- Bottom navigation bar (same as Home) -->
+            <!-- Date + day navigation (simple large chevrons) -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp">
+
+                <!-- Previous chevron -->
+                <ImageButton
+                    android:id="@+id/btnPrevDay"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="@android:color/transparent"
+                    android:padding="0dp"
+                    android:contentDescription="@string/previous_day"
+                    android:src="@drawable/ic_chevron_left_24"
+                    app:tint="@color/colorAccent"
+                    app:layout_constraintEnd_toStartOf="@id/tvDate"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_marginEnd="4dp"/>
+
+                <!-- Date centered -->
+                <TextView
+                    android:id="@+id/tvDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
+
+                <!-- Next chevron -->
+                <ImageButton
+                    android:id="@+id/btnNextDay"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="@android:color/transparent"
+                    android:padding="0dp"
+                    android:contentDescription="@string/next_day"
+                    android:src="@drawable/ic_chevron_right_24"
+                    app:tint="@color/colorAccent"
+                    app:layout_constraintStart_toEndOf="@id/tvDate"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_marginStart="4dp"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+            <!-- Mood Ring (larger) -->
+            <org.wit.mood.views.DailyMoodRingView
+                android:id="@+id/moodRing"
+                android:layout_width="320dp"
+                android:layout_height="320dp" />
+
+            <!-- Average label -->
+            <TextView
+                android:id="@+id/tvAverage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:textSize="16sp"
+                android:textStyle="italic"
+                android:textColor="@color/black" />
+
+            <!-- Legend -->
+            <LinearLayout
+                android:id="@+id/legend"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="12dp"/>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Bottom navigation (same as Home) -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"
@@ -88,7 +120,7 @@
         app:itemTextColor="@color/bottom_nav_text_tint"
         app:itemRippleColor="@android:color/transparent" />
 
-    <!-- Center FAB (same id & look as Home) -->
+    <!-- Center FAB (same look as Home) -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAdd"
         android:layout_width="56dp"

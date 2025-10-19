@@ -18,6 +18,9 @@
     <string name="button_cancel">Cancel</string>
     <string name="button_delete">Delete</string>
     <string name="update">Update Mood</string>
+    <string name="previous_day">Previous day</string>
+    <string name="next_day">Next day</string>
+
 
 
     <!-- Dropdown Options -->
