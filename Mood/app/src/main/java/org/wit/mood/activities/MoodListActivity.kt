@@ -44,8 +44,16 @@ class MoodListActivity : AppCompatActivity(), MoodListener {
                     true
                 }
                 R.id.nav_chart -> {
-                    // TODO: open Insights screen when you add it
-                    // startActivity(Intent(this, InsightsActivity::class.java))
+                    binding.bottomNav.setOnItemSelectedListener { item ->
+                        when (item.itemId) {
+                            R.id.nav_home -> true
+                            R.id.nav_chart -> {
+                                startActivity(Intent(this, InsightsActivity::class.java))
+                                true
+                            }
+                            else -> false
+                        }
+                    }
                     true
                 }
                 else -> false
