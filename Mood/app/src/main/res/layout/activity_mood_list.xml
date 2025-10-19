@@ -22,7 +22,7 @@
         android:layout_gravity="bottom"
         android:background="@color/sand_50"
         app:menu="@menu/menu_bottom"
-        app:labelVisibilityMode="labeled"
+        app:labelVisibilityMode="unlabeled"
         app:itemIconTint="@color/bottom_nav_icon_tint"
         app:itemTextColor="@color/bottom_nav_text_tint"
         app:itemRippleColor="@android:color/transparent" />

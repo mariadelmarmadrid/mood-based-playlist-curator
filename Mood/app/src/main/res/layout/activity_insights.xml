@@ -6,12 +6,14 @@
     android:layout_height="match_parent"
     android:background="@color/sand_50">
 
+    <!-- Content -->
     <LinearLayout
         android:orientation="vertical"
         android:padding="16dp"
         android:gravity="center_horizontal"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_marginBottom="120dp">  <!-- leave room for bottom bar + FAB -->
 
         <!-- Date + day navigation -->
         <LinearLayout
@@ -48,13 +50,13 @@
                 android:text="Next" />
         </LinearLayout>
 
-        <!-- The ring chart -->
+        <!-- Mood Ring -->
         <org.wit.mood.views.DailyMoodRingView
             android:id="@+id/moodRing"
             android:layout_width="280dp"
             android:layout_height="280dp" />
 
-        <!-- Average mood label -->
+        <!-- Average label -->
         <TextView
             android:id="@+id/tvAverage"
             android:layout_width="wrap_content"
@@ -64,7 +66,7 @@
             android:textStyle="italic"
             android:textColor="@color/black" />
 
-        <!-- Legend (optional & compact) -->
+        <!-- Legend -->
         <LinearLayout
             android:id="@+id/legend"
             android:layout_width="wrap_content"
@@ -72,5 +74,30 @@
             android:orientation="vertical"
             android:layout_marginTop="12dp"/>
     </LinearLayout>
+
+    <!-- Bottom navigation bar (same as Home) -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNav"
+        android:layout_width="match_parent"
+        android:layout_height="90dp"
+        android:layout_gravity="bottom"
+        android:background="@color/sand_50"
+        app:menu="@menu/menu_bottom"
+        app:labelVisibilityMode="unlabeled"
+        app:itemIconTint="@color/bottom_nav_icon_tint"
+        app:itemTextColor="@color/bottom_nav_text_tint"
+        app:itemRippleColor="@android:color/transparent" />
+
+    <!-- Center FAB (same id & look as Home) -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAdd"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginBottom="40dp"
+        app:srcCompat="@drawable/ic_add_24"
+        app:tint="@android:color/white"
+        app:backgroundTint="@android:color/black"
+        app:useCompatPadding="true" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -36,29 +36,21 @@ class MoodListActivity : AppCompatActivity(), MoodListener {
         updateRecyclerView()
 
         // --- Bottom Nav ---
-        binding.bottomNav.selectedItemId = R.id.nav_home  // default selected tab
+        binding.bottomNav.selectedItemId = R.id.nav_home   // <-- IMPORTANT: we're on Home
+
         binding.bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_home -> {
-                    // Already here – keep selected state
-                    true
-                }
+                R.id.nav_home -> true // already here
                 R.id.nav_chart -> {
-                    binding.bottomNav.setOnItemSelectedListener { item ->
-                        when (item.itemId) {
-                            R.id.nav_home -> true
-                            R.id.nav_chart -> {
-                                startActivity(Intent(this, InsightsActivity::class.java))
-                                true
-                            }
-                            else -> false
-                        }
-                    }
+                    startActivity(Intent(this, InsightsActivity::class.java))
+                    overridePendingTransition(0, 0)
                     true
                 }
                 else -> false
             }
         }
+        binding.bottomNav.setOnItemReselectedListener { /* no-op */ }
+
 
         // --- FAB → Add new mood ---
         binding.fabAdd.setOnClickListener {
