@@ -8,6 +8,9 @@ import androidx.recyclerview.widget.RecyclerView
 import org.wit.mood.databinding.CardDailySummaryBinding
 import org.wit.mood.main.MainApp
 import org.wit.mood.models.DailyMoodSummary
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class DailyMoodAdapter(
     private val days: List<DailyMoodSummary>,
@@ -39,7 +42,7 @@ class DailyMoodAdapter(
             listener: MoodListener,
             onDataChanged: () -> Unit
         ) {
-            binding.dateText.text = day.date
+            binding.dateText.text = formatDateForHeader(day.date)
 
             val avgScore = if (day.moods.isNotEmpty())
                 day.moods.map { it.type.score }.average()
@@ -109,5 +112,16 @@ class DailyMoodAdapter(
             lowercase().replace('_', ' ')
                 .split(' ')
                 .joinToString(" ") { it.replaceFirstChar { c -> c.titlecase() } }
+
+        private fun formatDateForHeader(dateStr: String): String {
+            return try {
+                val ld = LocalDate.parse(dateStr) // expects "yyyy-MM-dd"
+                val fmt = DateTimeFormatter.ofPattern("EEEE, d MMM yyyy", Locale.getDefault())
+                ld.format(fmt)                     // e.g., "Monday, 20 October 2025"
+            } catch (e: Exception) {
+                dateStr // fallback if parsing ever fails
+            }
+        }
+
     }
 }
