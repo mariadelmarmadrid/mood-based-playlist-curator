@@ -1,7 +1,6 @@
 package org.wit.mood.adapters
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -24,7 +23,7 @@ class MoodAdapter(
     }
 
     override fun onBindViewHolder(holder: MainHolder, position: Int) {
-        val mood = moods[holder.adapterPosition]
+        val mood = moods[holder.bindingAdapterPosition]
         holder.bind(mood, listener, onDeleteClick)
     }
 
@@ -43,23 +42,32 @@ class MoodAdapter(
             mood: MoodModel,
             listener: MoodListener,
             onDeleteClick: (MoodModel) -> Unit
-        ) {
-            binding.moodTitle.text = mood.type.label
-            binding.moodTimestamp.text = onlyTime(mood.timestamp) // show HH:mm only
-            binding.note.text = mood.note
+        ) = with(binding) {
+            // Basic fields
+            moodTitle.text = mood.type.label
+            moodTimestamp.text = onlyTime(mood.timestamp)   // "HH:mm"
+            note.text = mood.note
 
-            // Show each detail only if present (nullable-safe)
-            setRow(binding.sleep, "🛌",  mood.sleep)
-            setRow(binding.social, "👥", mood.social)
-            setRow(binding.hobby, "🎨",  mood.hobby)
-            setRow(binding.food,  "🍽️",  mood.food)
+            // Optional rows (hide if null)
+            setRow(sleep,  "🛌",  mood.sleep)
+            setRow(social, "👥",  mood.social)
+            setRow(hobby,  "🎨",  mood.hobby)
+            setRow(food,   "🍽️",  mood.food)
 
-            // Row click → edit
-            binding.root.setOnClickListener { listener.onMoodClick(mood) }
+            // Make the card itself inert (tap/long-press do nothing)
+            root.isClickable = true
+            root.isFocusable = false
+            root.setOnClickListener { /* no-op */ }
+            root.setOnLongClickListener { true }
 
-            // Delete with confirm dialog
-            binding.btnDelete.setOnClickListener {
-                val context = binding.root.context
+            // ✏️ Explicit edit button
+            btnEdit.isClickable = true
+            btnEdit.isFocusable = true
+            btnEdit.setOnClickListener { listener.onMoodClick(mood) }
+
+            // 🗑️ Delete with confirmation
+            btnDelete.setOnClickListener {
+                val context = root.context
                 android.app.AlertDialog.Builder(context)
                     .setTitle("Delete Mood")
                     .setMessage("Are you sure you want to delete this mood?")
@@ -70,19 +78,17 @@ class MoodAdapter(
         }
 
         private fun onlyTime(ts: String): String =
-            if (ts.length >= 16) ts.substring(11, 16) else ts // "yyyy-MM-dd HH:mm:ss" → "HH:mm"
+            ts.substring(11).take(5) // robust: takes "HH:mm" from "... HH:mm:ss"
 
-        // Hide view if value is null; pretty-print enum names if present
         private fun <E : Enum<*>> setRow(view: TextView, emoji: String, value: E?) {
             if (value == null) {
-                view.visibility = View.GONE
+                view.visibility = android.view.View.GONE
             } else {
                 view.text = "$emoji ${value.name.prettyEnumLabel()}"
-                view.visibility = View.VISIBLE
+                view.visibility = android.view.View.VISIBLE
             }
         }
 
-        // FAST_FOOD -> "Fast Food"
         private fun String.prettyEnumLabel(): String =
             lowercase().replace('_', ' ')
                 .split(' ')

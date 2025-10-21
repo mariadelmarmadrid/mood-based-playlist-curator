@@ -17,6 +17,7 @@
     <string name="menu_addMood">Add Mood</string>
     <string name="button_cancel">Cancel</string>
     <string name="button_delete">Delete</string>
+    <string name="button_edit">Edit</string>
     <string name="update">Update Mood</string>
     <string name="previous_day">Previous day</string>
     <string name="next_day">Next day</string>
