@@ -529,14 +529,20 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnCancel"
-                style="?attr/materialButtonOutlinedStyle"
+                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/button_cancel"
+                android:text="Cancel"
+                android:textColor="@color/colorAccent"
+                app:strokeColor="@color/colorAccent"
+                app:strokeWidth="1dp"
                 app:icon="@android:drawable/ic_menu_close_clear_cancel"
+                app:iconTint="@color/colorAccent"
                 app:iconPadding="8dp"
-                app:iconGravity="textStart"/>
+                app:iconGravity="textStart"
+                app:rippleColor="@color/colorAccent" />
+
         </LinearLayout>
 
     </LinearLayout>

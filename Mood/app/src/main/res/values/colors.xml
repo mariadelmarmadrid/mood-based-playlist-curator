@@ -1,28 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorBackground">#FFF3E9</color>
-    <color name="colorSurface">#FFF8F4</color>
-    <color name="colorAccent">#FF9E6D</color>
+
+    <!--  Base Theme Colors -->
+    <color name="colorBackground">#FAF4EE</color>     <!-- light sand / off-white -->
+    <color name="colorSurface">#FFFFFF</color>        <!-- pure white for cards -->
+    <color name="colorPrimary">#F5E0C8</color>        <!-- top/bottom bar tone -->
+    <color name="colorOnPrimary">#1A1A1A</color>      <!-- text/icons on top bar -->
+    <color name="colorAccent">#5E4335</color>         <!-- warm brown accent -->
     <color name="colorOnAccent">#FFFFFF</color>
 
+    <!--  Text and Icons -->
+    <color name="colorTextPrimary">#1A1A1A</color>
+    <color name="colorTextSecondary">#4E4E4E</color>
+    <color name="colorDivider">#1A000000</color>      <!-- thin line under bar -->
+
+    <!--  Basic utility -->
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
     <color name="gray">#B0B0B0</color>
 
-    <color name="bottomBarBg">#FFF3E9</color>
-    <color name="bottomIconDefault">#9AA0A6</color> <!-- gray -->
-    <color name="bottomIconActive">#000000</color>  <!-- black -->
-    <color name="fabBlack">#000000</color>
-    <color name="sand_50">#FFF3E9</color>
-    <color name="nav_icon_gray">#9AA0A6</color>
-    <color name="nav_icon_black">#000000</color>
+    <!--  Bottom Navigation -->
+    <color name="bottomBarBg">@color/colorPrimary</color>
+    <color name="bottomIconDefault">#9AA0A6</color>
+    <color name="bottomIconActive">@color/colorAccent</color>
+    <color name="fabBlack">@color/colorAccent</color>
 
+    <!--  Legacy support (your previous sand tone) -->
+    <color name="sand_50">@color/colorBackground</color>
+    <color name="nav_icon_gray">@color/bottomIconDefault</color>
+    <color name="nav_icon_black">@color/colorAccent</color>
 
-
-    <!-- Mood tints adjusted to match -->
+    <!--  Mood Category Tints -->
     <color name="mood_icon_default">#B0B0B0</color>
-    <color name="mood_happy">#FFB74D</color>
-    <color name="mood_relaxed">#81C784</color>
-    <color name="mood_neutral">#64B5F6</color>
-    <color name="mood_sad">#FF8A65</color>
-    <color name="mood_angry">#E57373</color>
+    <color name="mood_happy">#FFE08A</color>      <!-- soft yellow -->
+    <color name="mood_relaxed">#A5D6A7</color>    <!-- calm green -->
+    <color name="mood_neutral">#90CAF9</color>    <!-- light blue -->
+    <color name="mood_sad">#80CBC4</color>        <!-- soft teal -->
+    <color name="mood_angry">#FFAB91</color>      <!-- warm coral -->
 </resources>

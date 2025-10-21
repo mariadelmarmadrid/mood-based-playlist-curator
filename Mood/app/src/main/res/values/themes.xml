@@ -1,9 +1,19 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+
     <!-- Base application theme -->
     <style name="Theme.Mood" parent="Theme.Material3.DayNight.NoActionBar">
+
+        <!-- Backgrounds -->
         <item name="android:windowBackground">@color/colorBackground</item>
-        <item name="colorPrimary">@color/colorAccent</item>
-        <item name="colorOnPrimary">@color/colorOnAccent</item>
         <item name="colorSurface">@color/colorSurface</item>
+
+        <!-- Primary surfaces (top bar, bottom bar, FAB) -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorOnPrimary">@color/colorOnPrimary</item>
+
+        <!-- Accent actions (buttons, highlights) -->
+        <item name="colorSecondary">@color/colorAccent</item>
+        <item name="colorOnSecondary">@color/colorOnAccent</item>
     </style>
+
 </resources>
