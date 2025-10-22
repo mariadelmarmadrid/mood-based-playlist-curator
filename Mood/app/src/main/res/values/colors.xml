@@ -32,7 +32,7 @@
 
     <!--  Mood Category Tints -->
     <color name="mood_icon_default">#B0B0B0</color>
-    <color name="mood_happy">#FFE08A</color>      <!-- soft yellow -->
+    <color name="mood_happy">#FFCA28</color>      <!-- soft yellow -->
     <color name="mood_relaxed">#A5D6A7</color>    <!-- calm green -->
     <color name="mood_neutral">#90CAF9</color>    <!-- light blue -->
     <color name="mood_sad">#80CBC4</color>        <!-- soft teal -->
