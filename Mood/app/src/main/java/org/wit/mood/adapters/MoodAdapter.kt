@@ -7,13 +7,10 @@ import androidx.recyclerview.widget.RecyclerView
 import org.wit.mood.databinding.CardMoodBinding
 import org.wit.mood.models.MoodModel
 
-interface MoodListener {
-    fun onMoodClick(mood: MoodModel)
-}
 
 class MoodAdapter(
     private val moods: MutableList<MoodModel>,
-    private val listener: MoodListener,
+    private val onEditClick: (MoodModel) -> Unit,
     private val onDeleteClick: (MoodModel) -> Unit
 ) : RecyclerView.Adapter<MoodAdapter.MainHolder>() {
 
@@ -24,7 +21,7 @@ class MoodAdapter(
 
     override fun onBindViewHolder(holder: MainHolder, position: Int) {
         val mood = moods[holder.bindingAdapterPosition]
-        holder.bind(mood, listener, onDeleteClick)
+        holder.bind(mood, onEditClick, onDeleteClick)
     }
 
     override fun getItemCount(): Int = moods.size
@@ -40,7 +37,7 @@ class MoodAdapter(
 
         fun bind(
             mood: MoodModel,
-            listener: MoodListener,
+            onEditClick: (MoodModel) -> Unit,
             onDeleteClick: (MoodModel) -> Unit
         ) = with(binding) {
             // Basic fields
@@ -63,7 +60,7 @@ class MoodAdapter(
             // ✏️ Explicit edit button
             btnEdit.isClickable = true
             btnEdit.isFocusable = true
-            btnEdit.setOnClickListener { listener.onMoodClick(mood) }
+            btnEdit.setOnClickListener { onEditClick(mood) }
 
             // 🗑️ Delete with confirmation
             btnDelete.setOnClickListener {

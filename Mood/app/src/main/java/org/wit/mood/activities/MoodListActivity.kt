@@ -14,7 +14,6 @@ import androidx.core.view.doOnLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import org.wit.mood.R
 import org.wit.mood.adapters.DailyMoodAdapter
-import org.wit.mood.adapters.MoodListener
 import org.wit.mood.databinding.ActivityMoodListBinding
 import org.wit.mood.main.MainApp
 import org.wit.mood.models.DailyMoodSummary
@@ -32,7 +31,7 @@ import java.time.format.DateTimeFormatter
  * Uses DailyMoodAdapter to render "day cards", each containing its moods.
  */
 
-class MoodListActivity : AppCompatActivity(), MoodListener {
+class MoodListActivity : AppCompatActivity() {
 
     private lateinit var app: MainApp
     private lateinit var binding: ActivityMoodListBinding
@@ -187,7 +186,12 @@ class MoodListActivity : AppCompatActivity(), MoodListener {
         binding.recyclerView.adapter = DailyMoodAdapter(
             days = finalDays,
             app = app,
-            listener = this,
+            onEditClick = { mood ->
+                val intent = Intent(this, MoodActivity::class.java).apply {
+                    putExtra("mood_edit", mood)
+                }
+                getResult.launch(intent)
+            },
             onDataChanged = {
                 // Called when a mood is deleted/edited from inside an item
                 allMoods = app.moods.findAll()
@@ -312,11 +316,4 @@ class MoodListActivity : AppCompatActivity(), MoodListener {
     /** Density helper: dp(int) → px(int). */
     private fun dp(px: Int): Int = (px * resources.displayMetrics.density).toInt()
 
-    // ------- Adapter callback (edit an existing mood) -------
-    override fun onMoodClick(mood: MoodModel) {
-        val intent = Intent(this, MoodActivity::class.java).apply {
-            putExtra("mood_edit", mood)
-        }
-        getResult.launch(intent)
-    }
 }

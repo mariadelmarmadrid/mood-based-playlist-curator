@@ -10,6 +10,7 @@ import org.wit.mood.databinding.CardDailySummaryBinding
 import org.wit.mood.databinding.CardMoodBinding
 import org.wit.mood.main.MainApp
 import org.wit.mood.models.DailyMoodSummary
+import org.wit.mood.models.MoodModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -17,7 +18,7 @@ import java.util.Locale
 class DailyMoodAdapter(
     private var days: List<DailyMoodSummary>,
     private val app: MainApp,
-    private val listener: MoodListener,
+    private val onEditClick: (MoodModel) -> Unit,
     private val onDataChanged: () -> Unit
 ) : RecyclerView.Adapter<DailyMoodAdapter.DayHolder>() {
 
@@ -29,7 +30,7 @@ class DailyMoodAdapter(
     }
 
     override fun onBindViewHolder(holder: DayHolder, position: Int) {
-        holder.bind(days[holder.bindingAdapterPosition], app, listener, onDataChanged)
+        holder.bind(days[holder.bindingAdapterPosition], app, onEditClick, onDataChanged)
     }
 
     override fun getItemCount(): Int = days.size
@@ -45,7 +46,7 @@ class DailyMoodAdapter(
         fun bind(
             day: DailyMoodSummary,
             app: MainApp,
-            listener: MoodListener,
+            onEditClick: (MoodModel) -> Unit,
             onDataChanged: () -> Unit
         ) = with(binding) {
 
@@ -91,7 +92,7 @@ class DailyMoodAdapter(
                 moodView.root.setOnLongClickListener { true }
 
                 // ✏️ Explicit edit button
-                moodView.btnEdit.setOnClickListener { listener.onMoodClick(mood) }
+                moodView.btnEdit.setOnClickListener { onEditClick(mood) }
 
                 // 🗑️ Delete with confirmation
                 moodView.btnDelete.setOnClickListener {
