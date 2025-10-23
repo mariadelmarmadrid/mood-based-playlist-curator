@@ -16,14 +16,23 @@ import org.wit.mood.main.MainApp
 import org.wit.mood.models.DailyMoodSummary
 import org.wit.mood.models.MoodType
 
+/**
+ * Insights screen:
+ * - Shows one day's mood breakdown at a time (newest first).
+ * - Displays a ring chart of counts per mood + a legend.
+ * - Calculates a human-friendly average label (e.g., "Relaxed 😌").
+ * - Allows day-to-day navigation via chevrons.
+ */
 class InsightsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityInsightsBinding
     private lateinit var app: MainApp
 
+    // Full list of day summaries and the current index being shown (0 = newest)
     private var days: List<DailyMoodSummary> = emptyList()
     private var index = 0 // 0 = newest day
 
+    // Return from add/edit screen → if OK, reload summaries
     private val getResult =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == RESULT_OK) reloadDays()
@@ -36,11 +45,12 @@ class InsightsActivity : AppCompatActivity() {
 
         app = application as MainApp
 
-        // --- Bottom Nav ---
+        // --- Bottom navigation (Insights is the current tab) ---
         binding.bottomNav.selectedItemId = R.id.nav_chart
         binding.bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
+                    // Navigate to list without animation flicker
                     startActivity(Intent(this, MoodListActivity::class.java))
                     overridePendingTransition(0, 0)
                     true
@@ -49,31 +59,43 @@ class InsightsActivity : AppCompatActivity() {
                 else -> false
             }
         }
-        binding.bottomNav.setOnItemReselectedListener { /* no-op */ }
+        binding.bottomNav.setOnItemReselectedListener { /* keep current day */ }
 
-        // --- FAB -> add new mood ---
+        // --- FAB → add a new mood (comes back via getResult) ---
         binding.fabAdd.setOnClickListener {
             getResult.launch(Intent(this, MoodActivity::class.java))
         }
 
         // --- Day navigation (chevrons) ---
         binding.btnPrevDay.setOnClickListener {
+            // move towards older days if available
             if (index < days.lastIndex) { index++; renderDay() }
         }
         binding.btnNextDay.setOnClickListener {
+            // move towards newer days if available
             if (index > 0) { index--; renderDay() }
         }
 
-        // Initial load
+        // Initial load and render
         reloadDays()
     }
 
+    /**
+     * Reload the list of day summaries from storage and jump to newest.
+     */
     private fun reloadDays() {
         days = getDailySummaries()
-        index = 0 // jump to newest
+        index = 0 // newest day
         renderDay()
     }
 
+    /**
+     * Render the currently selected day:
+     * - update date label
+     * - compute and show average label
+     * - update ring chart + legend
+     * - enable/disable chevrons appropriately
+     */
     private fun renderDay() {
         if (days.isEmpty()) {
             binding.tvDate.text = getString(R.string.app_name)
@@ -88,6 +110,7 @@ class InsightsActivity : AppCompatActivity() {
         val day = days[index]
         binding.tvDate.text = day.date
 
+        // Human-friendly label derived from numeric average
         val avgLabel = when {
             day.averageScore >= 1.5 -> "Happy 😊"
             day.averageScore >= 0.5 -> "Relaxed 😌"
@@ -97,21 +120,28 @@ class InsightsActivity : AppCompatActivity() {
         }
         binding.tvAverage.text = "Average: $avgLabel"
 
-        // counts for ring + legend
+        // Build counts per mood for the ring + legend
         val counts = MoodType.values().associateWith { m ->
             day.moods.count { it.type == m }
         }
         binding.moodRing.setData(counts, avgLabel)
         renderLegend(counts)
 
-        // enable/disable chevrons at ends
+        // Enable/disable day-nav chevrons at ends
         binding.btnPrevDay.isEnabled = index < days.lastIndex
         binding.btnNextDay.isEnabled = index > 0
     }
 
+    /**
+     * Inflate and bind a legend row per mood:
+     * - mood icon (tinted)
+     * - textual label
+     * - small count badge (hidden when zero)
+     */
     private fun renderLegend(counts: Map<MoodType, Int>) {
         binding.legend.removeAllViews()
 
+        // Icon resources used for each mood type
         val moodToIcon = mapOf(
             MoodType.HAPPY   to R.drawable.ic_mood_happy_selector,
             MoodType.RELAXED to R.drawable.ic_mood_relaxed_selector,
@@ -120,6 +150,7 @@ class InsightsActivity : AppCompatActivity() {
             MoodType.ANGRY   to R.drawable.ic_mood_angry_selector
         )
 
+        // Solid colors matching each mood (for icon tint + badge bg)
         val moodToColor = mapOf(
             MoodType.HAPPY   to ContextCompat.getColor(this, R.color.mood_happy),
             MoodType.RELAXED to ContextCompat.getColor(this, R.color.mood_relaxed),
@@ -135,14 +166,14 @@ class InsightsActivity : AppCompatActivity() {
             val badge = item.findViewById<TextView>(R.id.badge)
             val label = item.findViewById<TextView>(R.id.label)
 
-            // icon + tint
+            // Icon + tint
             icon.setImageResource(moodToIcon[mood]!!)
             icon.imageTintList = ColorStateList.valueOf(moodToColor[mood]!!)
 
-            // label
+            // Text label (lowercase to match design)
             label.text = mood.label.lowercase()
 
-            // badge number + tint
+            // Badge number + tint; hide when 0
             val n = counts[mood] ?: 0
             badge.text = n.toString()
             ViewCompat.setBackgroundTintList(
@@ -155,6 +186,13 @@ class InsightsActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Build daily summaries by:
+     * - grouping all moods by yyyy-MM-dd
+     * - sorting each group by time desc (latest first)
+     * - computing per-day average score
+     * - sorting days desc (newest first)
+     */
     private fun getDailySummaries(): List<DailyMoodSummary> {
         val all = app.moods.findAll()
         val grouped = all.groupBy { it.timestamp.take(10) } // yyyy-MM-dd
