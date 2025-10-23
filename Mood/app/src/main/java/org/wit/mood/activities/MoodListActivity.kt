@@ -23,21 +23,31 @@ import timber.log.Timber.i
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+/**
+ * Home screen: shows moods grouped by day with filtering:
+ * - keyword search (in note)
+ * - date range presets (All / Today / Last 7)
+ * - minimum daily average score slider
+ *
+ * Uses DailyMoodAdapter to render "day cards", each containing its moods.
+ */
+
 class MoodListActivity : AppCompatActivity(), MoodListener {
 
     private lateinit var app: MainApp
     private lateinit var binding: ActivityMoodListBinding
 
-    // ---- Filter state ----
+    // ---- Filter state (single source of truth for the UI) ----
     private var allMoods: List<MoodModel> = emptyList()
-    private var queryText: String = ""             // keyword in NOTE only
-    private var dateFrom: LocalDate? = null        // null = all dates
-    private var dateTo: LocalDate? = null
-    private var minDailyAvg: Double = -2.0         // -2.0 = no filter
+    private var queryText: String = ""             // search within NOTE only
+    private var dateFrom: LocalDate? = null        // null → no lower bound
+    private var dateTo: LocalDate? = null          // null → no upper bound
+    private var minDailyAvg: Double = -2.0         // -2.0 → treat as "All"
 
     private val dayFmt: DateTimeFormatter by lazy { DateTimeFormatter.ISO_LOCAL_DATE } // "yyyy-MM-dd"
     private var filterVisible = false
 
+    // Re-launch add/edit screen and refresh on RESULT_OK
     private val getResult =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == RESULT_OK) {
@@ -51,20 +61,18 @@ class MoodListActivity : AppCompatActivity(), MoodListener {
         binding = ActivityMoodListBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
         app = application as MainApp
 
-        // Toolbar
+        // Toolbar (static, with filter icon action)
         setSupportActionBar(binding.topAppBar)
 
-        // Recycler
+        // RecyclerView layout
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
 
-
-        // Load data
+        // Initial data from store
         allMoods = app.moods.findAll()
 
-        // --- Search (notes) ---
+        // --- Search (note text only) ---
         binding.inputSearchNotes.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -74,7 +82,7 @@ class MoodListActivity : AppCompatActivity(), MoodListener {
             }
         })
 
-        // --- Date chips ---
+        // --- Date presets (mutually independent; each sets range then refreshes) ---
         binding.chipAllDates.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 dateFrom = null
@@ -93,13 +101,13 @@ class MoodListActivity : AppCompatActivity(), MoodListener {
         binding.chipLast7.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 val today = LocalDate.now()
-                dateFrom = today.minusDays(6) // inclusive 7-day window
+                dateFrom = today.minusDays(6) // inclusive 7-day window [today-6, today]
                 dateTo = today
                 refreshList()
             }
         }
 
-        // --- Min average slider ---
+        // --- Minimum average slider (updates label + refilters) ---
         binding.sliderMinAvg.addOnChangeListener { _, value, _ ->
             minDailyAvg = value.toDouble()
             binding.avgLabel.text =
@@ -108,13 +116,14 @@ class MoodListActivity : AppCompatActivity(), MoodListener {
             refreshList()
         }
 
-        // --- Filter actions ---
+        // --- Filter panel actions ---
         binding.btnApply.setOnClickListener {
             refreshList()
             hideFilterPanel()
             binding.recyclerView.scrollToPosition(0)
         }
         binding.btnReset.setOnClickListener {
+            // Reset widgets → sync state → refresh
             binding.inputSearchNotes.setText("")
             binding.chipAllDates.isChecked = true
             binding.sliderMinAvg.value = -2f
@@ -126,11 +135,11 @@ class MoodListActivity : AppCompatActivity(), MoodListener {
             hideFilterPanel()
         }
 
-        // Initial render + padding for toolbar
+        // First render and compute top padding after toolbar/layout pass
         refreshList()
         binding.topAppBar.doOnLayout { adjustRecyclerTopPadding() }
 
-        // Bottom Nav
+        // Bottom navigation (Home ↔ Insights) — stays in-place (no animation)
         binding.bottomNav.selectedItemId = R.id.nav_home
         binding.bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -143,15 +152,15 @@ class MoodListActivity : AppCompatActivity(), MoodListener {
                 else -> false
             }
         }
-        binding.bottomNav.setOnItemReselectedListener { /* no-op */ }
+        binding.bottomNav.setOnItemReselectedListener { /* no-op: keep position */ }
 
-        // FAB
+        // FAB → open add screen and refresh upon return
         binding.fabAdd.setOnClickListener {
             getResult.launch(Intent(this, MoodActivity::class.java))
         }
     }
 
-    // ------- Toolbar menu -------
+    // ------- Toolbar menu (filter button) -------
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_top, menu)
         return true
@@ -164,7 +173,12 @@ class MoodListActivity : AppCompatActivity(), MoodListener {
         }
     }
 
-    // ------- Filtering pipeline -------
+    // ------- Filtering pipeline (pure-ish functions + adapter wiring) -------
+
+    /**
+     * Applies keyword → groups into day summaries → applies date/avg filters
+     * then swaps the adapter. Called whenever a filter input changes.
+     */
     private fun refreshList() {
         val keywordFiltered = applyKeywordFilter(allMoods, queryText)
         val summaries = toDailySummaries(keywordFiltered)
@@ -175,6 +189,7 @@ class MoodListActivity : AppCompatActivity(), MoodListener {
             app = app,
             listener = this,
             onDataChanged = {
+                // Called when a mood is deleted/edited from inside an item
                 allMoods = app.moods.findAll()
                 refreshList()
             }
@@ -182,12 +197,20 @@ class MoodListActivity : AppCompatActivity(), MoodListener {
         i("Recycler updated with ${finalDays.size} daily summaries (filters applied)")
     }
 
+    /**
+     * Filters notes by a case-insensitive substring match.
+     * Only the NOTE field is searched (not enums or timestamp).
+     */
     private fun applyKeywordFilter(source: List<MoodModel>, query: String): List<MoodModel> {
         val q = query.trim().lowercase()
         if (q.isEmpty()) return source
         return source.filter { m -> m.note.orEmpty().lowercase().contains(q) }
     }
 
+    /**
+     * Groups moods by date (yyyy-MM-dd), sorts each day's moods by time desc,
+     * and computes the day's average mood score.
+     */
     private fun toDailySummaries(list: List<MoodModel>): List<DailyMoodSummary> {
         val grouped = list.groupBy { it.timestamp.take(10) } // "yyyy-MM-dd"
         return grouped.map { (date, moods) ->
@@ -197,6 +220,10 @@ class MoodListActivity : AppCompatActivity(), MoodListener {
         }.sortedByDescending { it.date }
     }
 
+    /**
+     * Applies the date-range filter (inclusive) and minimum daily average filter.
+     * If parsing fails, the date is treated as valid to avoid hiding data unexpectedly.
+     */
     private fun filterSummaries(
         days: List<DailyMoodSummary>,
         from: LocalDate?,
@@ -207,8 +234,8 @@ class MoodListActivity : AppCompatActivity(), MoodListener {
             val ld = runCatching { LocalDate.parse(d.date, dayFmt) }.getOrNull()
             val okDate = if (ld == null) true
             else {
-                val gteFrom = from?.let { !ld.isBefore(it) } ?: true
-                val lteTo   = to?.let   { !ld.isAfter(it) }  ?: true
+                val gteFrom = from?.let { !ld.isBefore(it) } ?: true // ≥ from
+                val lteTo   = to?.let   { !ld.isAfter(it) }  ?: true // ≤ to
                 gteFrom && lteTo
             }
             val okAvg = (minAvg <= -2.0) || (d.averageScore >= minAvg)
@@ -216,16 +243,19 @@ class MoodListActivity : AppCompatActivity(), MoodListener {
         }
     }
 
-    // ------- Panel show/hide + padding -------
+    // ------- Filter panel show/hide with small slide animation -------
+
+    /** Toggles the visibility of the filter card with a short animation. */
     private fun toggleFilterPanel() {
         if (filterVisible) hideFilterPanel() else showFilterPanel()
     }
 
+    /** Slides the filter card down into view; recalculates top padding afterward. */
     private fun showFilterPanel() {
         if (binding.filterCard.visibility == View.VISIBLE) return
         binding.filterCard.visibility = View.VISIBLE
         binding.filterCard.alpha = 0f
-        binding.filterCard.doOnLayout {           // <-- wait for measured height
+        binding.filterCard.doOnLayout {           // wait until measured to get correct height
             binding.filterCard.translationY = -binding.filterCard.height.toFloat()
             binding.filterCard.animate()
                 .alpha(1f)
@@ -237,6 +267,7 @@ class MoodListActivity : AppCompatActivity(), MoodListener {
         filterVisible = true
     }
 
+    /** Slides the filter card up and hides it; then adjusts top padding. */
     private fun hideFilterPanel() {
         if (binding.filterCard.visibility != View.VISIBLE) return
         // height is known here because it's visible
@@ -253,12 +284,16 @@ class MoodListActivity : AppCompatActivity(), MoodListener {
     }
 
 
-    /** Sets list top padding to toolbar height (+ filter height if visible). */
-
+    /**
+     * Adjusts RecyclerView padding so content never sits under the toolbar or FAB+BottomNav.
+     * - Top padding = filter height (if visible) + a small extra dp.
+     * - Bottom padding = BottomNav height + half FAB + its margin + extra dp.
+     */
     private fun adjustRecyclerTopPadding() {
         val filterH = if (binding.filterCard.visibility == View.VISIBLE) binding.filterCard.height else 0
         val topPad = if (filterH > 0) filterH + dp(8) else 0 // ONLY extra for filter
-        // Keep your bottom padding logic (BottomNav + FAB) as-is:
+
+        // Compute bottom padding after BottomNav/FAB have laid out
         binding.bottomNav.doOnLayout {
             binding.fabAdd.doOnLayout {
                 val fabHalf = binding.fabAdd.height / 2
@@ -274,10 +309,10 @@ class MoodListActivity : AppCompatActivity(), MoodListener {
         }
     }
 
-
+    /** Density helper: dp(int) → px(int). */
     private fun dp(px: Int): Int = (px * resources.displayMetrics.density).toInt()
 
-    // Adapter callback
+    // ------- Adapter callback (edit an existing mood) -------
     override fun onMoodClick(mood: MoodModel) {
         val intent = Intent(this, MoodActivity::class.java).apply {
             putExtra("mood_edit", mood)
