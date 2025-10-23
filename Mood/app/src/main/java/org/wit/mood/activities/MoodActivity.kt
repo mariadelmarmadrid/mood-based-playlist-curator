@@ -13,12 +13,24 @@ import timber.log.Timber.i
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+/**
+ * Screen to CREATE or EDIT a mood entry.
+ *
+ * - If launched without extras → create mode.
+ * - If launched with "mood_edit" Parcelable extra → edit mode (pre-fills UI, updates on save).
+ *
+ * Persists data via MainApp.moods (JSON store).
+ */
+
 class MoodActivity : AppCompatActivity() {
 
+    // ViewBinding for this layout (type-safe access to views)
     private lateinit var binding: ActivityMoodBinding
+
+    // Application-level reference exposing the MoodStore
     private lateinit var app: MainApp
 
-    // If not null, we're editing
+    // Holds the mood being edited; null = create mode
     private var editingMood: MoodModel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,7 +41,7 @@ class MoodActivity : AppCompatActivity() {
         app = application as MainApp
         i("Mood Activity started…")
 
-        // Make the 5 emoji chips behave like a single-selection group
+        // Make the 5 emoji chips behave like a SINGLE-SELECTION group
         wireSingleSelectChips(
             binding.chipHappy,
             binding.chipRelaxed,
@@ -38,13 +50,13 @@ class MoodActivity : AppCompatActivity() {
             binding.chipAngry
         )
 
-        // Default: Neutral for new entries
+        // Default selection for brand-new entries
         binding.chipNeutral.isChecked = true
 
-        // --- EDIT MODE ---
+        // --- EDIT MODE: if a MoodModel was passed in, pre-fill the form and switch button text ---
         editingMood = intent.getParcelableExtra("mood_edit")
         editingMood?.let { m ->
-            // Select main mood chip
+            // Select the main mood chip that matches the existing entry
             when (m.type) {
                 MoodType.HAPPY   -> binding.chipHappy.isChecked = true
                 MoodType.RELAXED -> binding.chipRelaxed.isChecked = true
@@ -53,23 +65,29 @@ class MoodActivity : AppCompatActivity() {
                 MoodType.ANGRY   -> binding.chipAngry.isChecked = true
             }
 
-            // Prefill optional detail groups (only if value present)
+            // Pre-select OPTIONAL detail chips only if the value exists on the model
             selectChipByText(binding.sleepChipGroup,   m.sleep?.name?.lowercase()?.replaceFirstChar { it.uppercase() })
             selectChipByText(binding.socialChipGroup,  m.social?.name?.lowercase()?.replaceFirstChar { it.uppercase() })
             selectChipByText(binding.hobbyChipGroup,   m.hobby?.name?.lowercase()?.replaceFirstChar { it.uppercase() })
             selectChipByText(binding.foodChipGroup,    m.food?.name?.lowercase()?.replace('_',' ')?.replaceFirstChar { it.uppercase() })
 
+            // Prefill note and swap the button label to "Update"
             binding.note.setText(m.note)
             binding.btnAdd.text = getString(R.string.update)
         }
 
+        // Primary actions
         binding.btnAdd.setOnClickListener { onSaveClicked() }
         binding.btnCancel.setOnClickListener { finish() }
     }
 
     // ---------- Actions ----------
-
+    /**
+     * Validate inputs, then either CREATE a new mood or UPDATE the existing one.
+     * Shows a brief Snackbar for feedback and finishes the Activity with RESULT_OK.
+     */
     private fun onSaveClicked() {
+        // Must have one main mood selected
         val selectedType = selectedMoodTypeOrNull()
         if (selectedType == null) {
             Snackbar.make(binding.root, "Please select a mood!", Snackbar.LENGTH_SHORT).show()
@@ -83,7 +101,8 @@ class MoodActivity : AppCompatActivity() {
         val food   = foodFromChip(   selectedChipText(binding.foodChipGroup))
 
         if (editingMood == null) {
-            // CREATE
+            // --- CREATE path ---
+            // Timestamp format used consistently across the app
             val timestamp = LocalDateTime.now()
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
 
@@ -100,7 +119,8 @@ class MoodActivity : AppCompatActivity() {
             i("Mood created: $newMood")
             Snackbar.make(binding.root, "Mood added!", Snackbar.LENGTH_SHORT).show()
         } else {
-            // UPDATE (preserve id + timestamp)
+            // --- UPDATE path ---
+            // Keep the original id and timestamp to preserve history ordering
             val updated = editingMood!!.copy(
                 type = selectedType,
                 note = binding.note.text?.toString().orEmpty(),
@@ -115,24 +135,33 @@ class MoodActivity : AppCompatActivity() {
             Snackbar.make(binding.root, "Mood updated!", Snackbar.LENGTH_SHORT).show()
         }
 
+        // Let the caller (e.g., list screen) know something changed
         setResult(RESULT_OK)
         finish()
     }
 
     // ---------- Helpers ----------
 
-    /** Make a set of Chips behave like single-selection (since emoji chips are not in a ChipGroup). */
+    /**
+     * Makes a set of Chips act like a single-choice group.
+     * Only one chip can be checked at a time.
+     */
     private fun wireSingleSelectChips(vararg chips: Chip) {
         chips.forEach { chip ->
             chip.setOnCheckedChangeListener { button, isChecked ->
                 if (isChecked) {
+                    // Uncheck every other chip
                     chips.filter { it.id != button.id }.forEach { it.isChecked = false }
                 }
             }
         }
     }
 
-    /** Returns the selected mood type based on the checked emoji chip’s tag/label. */
+    /**
+     * Returns the main MoodType based on which emoji chip is checked.
+     * NOTE: This matches chip.tag (string) to MoodType.label; keep labels in sync.
+     * Consider tagging chips with the enum directly for extra safety.
+     */
     private fun selectedMoodTypeOrNull(): MoodType? {
         val checkedChip = listOf(
             binding.chipHappy,
@@ -146,8 +175,11 @@ class MoodActivity : AppCompatActivity() {
         return MoodType.values().firstOrNull { it.label == labelFromTag }
     }
 
-    // ---- Your helpers: put them here (inside the Activity) ----
+    // ---- Converters & small utilities ----
 
+    /**
+     * @return the displayed text of the selected Chip in a ChipGroup, or null if none selected.
+     */
     private fun selectedChipText(group: ChipGroup): String? {
         val id = group.checkedChipId
         if (id == -1) return null
@@ -155,7 +187,8 @@ class MoodActivity : AppCompatActivity() {
         return chip?.text?.toString()
     }
 
-    // mappers that return null if no selection
+    // Map label text → enum value (null if no selection).
+    // NOTE: depends on the Chip text exactly matching the enum name (with casing/spaces handled below).n
     private fun sleepFromChip(text: String?): SleepQuality? =
         text?.let { SleepQuality.valueOf(it.uppercase()) }
 
@@ -168,7 +201,11 @@ class MoodActivity : AppCompatActivity() {
     private fun foodFromChip(text: String?): FoodType? =
         text?.let { FoodType.valueOf(it.replace(" ", "_").uppercase()) }
 
-    /** Helper to pre-select a chip in a group by its displayed text (case sensitive). */
+    /**
+     * Pre-select a Chip in a group by its displayed text (case sensitive).
+     * Used in edit mode to restore previous choices.
+     * NOTE: This is string-based; if you localize, consider enum tags instead.
+     */
     private fun selectChipByText(group: ChipGroup, text: String?) {
         if (text.isNullOrEmpty()) return
         for (i in 0 until group.childCount) {
