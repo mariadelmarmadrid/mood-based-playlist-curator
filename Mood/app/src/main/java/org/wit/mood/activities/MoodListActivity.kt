@@ -108,10 +108,16 @@ class MoodListActivity : AppCompatActivity() {
 
         // --- Minimum average slider (updates label + refilters) ---
         binding.sliderMinAvg.addOnChangeListener { _, value, _ ->
-            minDailyAvg = value.toDouble()
+            val pos = value.toInt()                    // -2..2
+            val threshold = thresholdFor(pos)
+            val label = moodLabelFor(pos)
+
+            minDailyAvg = threshold ?: -2.0
+
             binding.avgLabel.text =
-                if (minDailyAvg <= -2.0) "Min daily average: All"
-                else "Min daily average: ${"%.1f".format(minDailyAvg)}"
+                if (threshold == null) "Min daily average: All"
+                else "Min daily average: $label"
+
             refreshList()
         }
 
@@ -315,5 +321,42 @@ class MoodListActivity : AppCompatActivity() {
 
     /** Density helper: dp(int) → px(int). */
     private fun dp(px: Int): Int = (px * resources.displayMetrics.density).toInt()
+
+    /**
+     * Maps the slider’s integer position (-2..2) to a human-readable mood label.
+     *
+     * Used only for display on the UI (e.g., "Min daily average: Happy 😊").
+     * Each position represents a qualitative range of average mood scores:
+     *   2 → Happy, 1 → Relaxed, 0 → Neutral, -1 → Sad, -2 → All (no filter)
+     */
+    private fun moodLabelFor(pos: Int): String = when (pos) {
+        2 -> "Happy 😊"
+        1 -> "Relaxed 😌"
+        0 -> "Neutral 😐"
+        -1 -> "Sad 😢"
+        -2 -> "All"
+        else -> "All"
+    }
+
+    /**
+     * Converts the slider’s integer position (-2..2) to the corresponding
+     * minimum average score threshold used by the filter.
+     *
+     * Returns:
+     *   - A Double threshold (e.g. 1.5 for "Happy") when filtering by mood level.
+     *   - null when "All" is selected, meaning no filter should be applied.
+     *
+     * This ensures that qualitative labels ("Happy", "Relaxed", etc.)
+     * are correctly mapped to their numeric cutoff values used internally.
+     */
+    private fun thresholdFor(pos: Int): Double? = when (pos) {
+        2 -> 1.5
+        1 -> 0.5
+        0 -> -0.5
+        -1 -> -1.5
+        -2 -> null     // null means "All"
+        else -> null
+    }
+
 
 }
