@@ -1,7 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Defines the menu items displayed in the top app bar (MaterialToolbar)
+  of the Mood List screen (MoodListActivity).
+
+  Currently contains one action:
+    • A "Filter" icon button used to show/hide the filter panel.
+
+  The menu is inflated in MoodListActivity.onCreateOptionsMenu()
+  and handled in onOptionsItemSelected().
+-->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <!-- ===== Filter action =====
+         Opens or hides the filter card below the top bar.
+         ID: action_filter
+         Icon: ic_filter_list_24 (filter list symbol)
+         Title: "Filter" (used for accessibility; shown as tooltip)
+         showAsAction="always" → always visible on the toolbar.
+    -->
     <item
         android:id="@+id/action_filter"
         android:title="Filter"
