@@ -1,46 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Represents a single item in the mood legend shown in the Insights screen.
+
+  Each legend item displays:
+    • The mood icon (colored vector)
+    • A small badge showing how many times that mood occurred in the day
+    • A text label with the mood name (e.g., "happy", "relaxed")
+
+  Used by:
+    • InsightsActivity.renderLegend() → dynamically inflates and populates one
+      instance for each MoodType inside the FlexboxLayout with id @+id/legend
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="72dp"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
     android:gravity="center_horizontal"
+    android:orientation="vertical"
     android:paddingHorizontal="4dp"
     android:paddingTop="4dp"
     android:paddingBottom="8dp">
 
+    <!-- ===== Icon container =====
+         FrameLayout lets the circular badge overlap the icon.
+    -->
     <FrameLayout
         android:layout_width="40dp"
         android:layout_height="40dp">
 
-        <!-- Mood icon (outline/emoji/vector you already have) -->
+        <!-- Mood icon
+             The actual drawable (e.g., happy/neutral/sad icon) is set dynamically
+             with tint color applied in code.
+        -->
         <ImageView
             android:id="@+id/icon"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="4dp"
             android:contentDescription="@null"
-            android:scaleType="fitCenter"/>
+            android:padding="4dp"
+            android:scaleType="fitCenter" />
 
-        <!-- Badge -->
+        <!-- Count badge
+             Displays number of occurrences for this mood.
+             Example: "3" → three happy entries that day.
+        -->
         <TextView
             android:id="@+id/badge"
             android:layout_width="18dp"
             android:layout_height="18dp"
             android:layout_gravity="end|top"
+            android:background="@drawable/bg_badge_round"
             android:gravity="center"
-            android:textColor="@android:color/white"
-            android:textSize="10sp"
-            android:textStyle="bold"
             android:minWidth="18dp"
             android:minHeight="18dp"
-            android:background="@drawable/bg_badge_round" />
+            android:textColor="@android:color/white"
+            android:textSize="10sp"
+            android:textStyle="bold" />
     </FrameLayout>
 
+    <!-- ===== Mood label =====
+         Displays the lowercase mood name (e.g., "happy").
+         Text and color are applied dynamically in renderLegend().
+    -->
     <TextView
         android:id="@+id/label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:textSize="12sp"
-        android:textColor="@color/black"/>
+        android:textColor="@color/black"
+        android:textSize="12sp" />
 </LinearLayout>
