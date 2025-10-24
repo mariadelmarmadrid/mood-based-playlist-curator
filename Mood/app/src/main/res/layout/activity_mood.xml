@@ -1,502 +1,524 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?><!--
+  Screen for creating/updating a Mood entry.
+  - Top row: 5 emoji "chips" behaving like single-select (handled in MoodActivity)
+  - Optional detail groups (sleep/social/hobby/food) as single-selection ChipGroups
+  - Free-text note
+  - Add / Cancel buttons
+-->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
 
+    <!-- Root vertical stack -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- Section title: “Select your mood” -->
         <TextView
             android:id="@+id/labelSelectMood"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="8dp"
             android:text="@string/label_select_mood"
             android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp"
-            android:layout_gravity="center_horizontal" />
+            android:textStyle="bold" />
 
 
-        <!-- Moods section -->
+        <!-- ==========================================================
+             Moods row (5 columns: Happy/Relaxed/Neutral/Sad/Angry)
+             Each column holds a Chip with only an icon (no text)
+             ========================================================== -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:layout_marginBottom="16dp"
             android:gravity="center"
-            android:weightSum="5"
-            android:layout_marginBottom="16dp">
+            android:orientation="horizontal"
+            android:weightSum="5">
 
-            <!-- ===== Column template repeated for each mood ===== -->
+            <!-- ===== Common column template (Happy shown) ===== -->
             <!-- Happy -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center_horizontal">
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
 
+                <!-- Frame keeps chip touch target sized and centered -->
                 <FrameLayout
                     android:layout_width="56dp"
                     android:layout_height="56dp"
                     android:layout_gravity="center_horizontal"
-                    android:padding="4dp"
-                    android:clipToPadding="false">
+                    android:clipToPadding="false"
+                    android:padding="4dp">
 
+                    <!-- Icon-only Chip (checkable) -->
                     <com.google.android.material.chip.Chip
                         android:id="@+id/chipHappy"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:minWidth="0dp"
-                        android:minHeight="0dp"
-                        android:text=""
-                        android:tag="Happy 😊"
+                        android:layout_gravity="center"
+                        android:contentDescription="@string/desc_mood_happy"
                         android:checkable="true"
                         android:clickable="true"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:tag="Happy 😊"
+                        android:text=""
                         app:checkedIconVisible="false"
                         app:chipBackgroundColor="@android:color/transparent"
-                        app:chipStrokeWidth="0dp"
-                        app:rippleColor="@android:color/transparent"
-                        app:ensureMinTouchTargetSize="false"
-                        app:chipStartPadding="0dp"
                         app:chipEndPadding="0dp"
-                        app:iconStartPadding="0dp"
-                        app:iconEndPadding="0dp"
                         app:chipIcon="@drawable/ic_mood_happy_selector"
-                        app:chipIconTint="@color/mood_happy_tint"
                         app:chipIconSize="48dp"
-                        android:layout_gravity="center"/>
+                        app:chipIconTint="@color/mood_happy_tint"
+                        app:chipStartPadding="0dp"
+                        app:chipStrokeWidth="0dp"
+                        app:ensureMinTouchTargetSize="false"
+                        app:iconEndPadding="0dp"
+                        app:iconStartPadding="0dp"
+                        app:rippleColor="@android:color/transparent" />
                 </FrameLayout>
 
+                <!-- Caption under the icon -->
                 <TextView
                     style="@style/TextAppearance.Material3.BodySmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="happy"
+                    android:layout_gravity="center_horizontal"
                     android:gravity="center"
-                    android:layout_gravity="center_horizontal"/>
+                    android:text="@string/mood_happy" />
             </LinearLayout>
 
-            <!-- Relaxed -->
+            <!-- Relaxed column -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center_horizontal">
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
 
                 <FrameLayout
                     android:layout_width="56dp"
                     android:layout_height="56dp"
                     android:layout_gravity="center_horizontal"
-                    android:padding="4dp"
-                    android:clipToPadding="false">
+                    android:clipToPadding="false"
+                    android:padding="4dp">
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/chipRelaxed"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:minWidth="0dp"
-                        android:minHeight="0dp"
-                        android:text=""
-                        android:tag="Relaxed 😌"
+                        android:layout_gravity="center"
+                        android:contentDescription="@string/desc_mood_relaxed"
                         android:checkable="true"
                         android:clickable="true"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:tag="Relaxed 😌"
+                        android:text=""
                         app:checkedIconVisible="false"
                         app:chipBackgroundColor="@android:color/transparent"
-                        app:chipStrokeWidth="0dp"
-                        app:rippleColor="@android:color/transparent"
-                        app:ensureMinTouchTargetSize="false"
-                        app:chipStartPadding="0dp"
                         app:chipEndPadding="0dp"
-                        app:iconStartPadding="0dp"
-                        app:iconEndPadding="0dp"
                         app:chipIcon="@drawable/ic_mood_relaxed_selector"
-                        app:chipIconTint="@color/mood_relaxed_tint"
                         app:chipIconSize="48dp"
-                        android:layout_gravity="center"/>
+                        app:chipIconTint="@color/mood_relaxed_tint"
+                        app:chipStartPadding="0dp"
+                        app:chipStrokeWidth="0dp"
+                        app:ensureMinTouchTargetSize="false"
+                        app:iconEndPadding="0dp"
+                        app:iconStartPadding="0dp"
+                        app:rippleColor="@android:color/transparent" />
                 </FrameLayout>
 
                 <TextView
                     style="@style/TextAppearance.Material3.BodySmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="relaxed"
+                    android:layout_gravity="center_horizontal"
                     android:gravity="center"
-                    android:layout_gravity="center_horizontal"/>
+                    android:text="@string/mood_relaxed" />
             </LinearLayout>
 
-            <!-- Neutral -->
+            <!-- Neutral column -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center_horizontal">
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
 
                 <FrameLayout
                     android:layout_width="56dp"
                     android:layout_height="56dp"
                     android:layout_gravity="center_horizontal"
-                    android:padding="4dp"
-                    android:clipToPadding="false">
+                    android:clipToPadding="false"
+                    android:padding="4dp">
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/chipNeutral"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:minWidth="0dp"
-                        android:minHeight="0dp"
-                        android:text=""
-                        android:tag="Neutral 😐"
+                        android:layout_gravity="center"
+                        android:contentDescription="@string/desc_mood_neutral"
                         android:checkable="true"
                         android:clickable="true"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:tag="Neutral 😐"
+                        android:text=""
                         app:checkedIconVisible="false"
                         app:chipBackgroundColor="@android:color/transparent"
-                        app:chipStrokeWidth="0dp"
-                        app:rippleColor="@android:color/transparent"
-                        app:ensureMinTouchTargetSize="false"
-                        app:chipStartPadding="0dp"
                         app:chipEndPadding="0dp"
-                        app:iconStartPadding="0dp"
-                        app:iconEndPadding="0dp"
                         app:chipIcon="@drawable/ic_mood_neutral_selector"
-                        app:chipIconTint="@color/mood_neutral_tint"
                         app:chipIconSize="48dp"
-                        android:layout_gravity="center"/>
+                        app:chipIconTint="@color/mood_neutral_tint"
+                        app:chipStartPadding="0dp"
+                        app:chipStrokeWidth="0dp"
+                        app:ensureMinTouchTargetSize="false"
+                        app:iconEndPadding="0dp"
+                        app:iconStartPadding="0dp"
+                        app:rippleColor="@android:color/transparent" />
                 </FrameLayout>
 
                 <TextView
                     style="@style/TextAppearance.Material3.BodySmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="neutral"
+                    android:layout_gravity="center_horizontal"
                     android:gravity="center"
-                    android:layout_gravity="center_horizontal"/>
+                    android:text="@string/mood_neutral" />
             </LinearLayout>
 
-            <!-- Sad -->
+            <!-- Sad column -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center_horizontal">
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
 
                 <FrameLayout
                     android:layout_width="56dp"
                     android:layout_height="56dp"
                     android:layout_gravity="center_horizontal"
-                    android:padding="4dp"
-                    android:clipToPadding="false">
+                    android:clipToPadding="false"
+                    android:padding="4dp">
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/chipSad"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:minWidth="0dp"
-                        android:minHeight="0dp"
-                        android:text=""
-                        android:tag="Sad 😢"
+                        android:layout_gravity="center"
+                        android:contentDescription="@string/desc_mood_sad"
                         android:checkable="true"
                         android:clickable="true"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:tag="Sad 😢"
+                        android:text=""
                         app:checkedIconVisible="false"
                         app:chipBackgroundColor="@android:color/transparent"
-                        app:chipStrokeWidth="0dp"
-                        app:rippleColor="@android:color/transparent"
-                        app:ensureMinTouchTargetSize="false"
-                        app:chipStartPadding="0dp"
                         app:chipEndPadding="0dp"
-                        app:iconStartPadding="0dp"
-                        app:iconEndPadding="0dp"
                         app:chipIcon="@drawable/ic_mood_sad_selector"
-                        app:chipIconTint="@color/mood_sad_tint"
                         app:chipIconSize="48dp"
-                        android:layout_gravity="center"/>
+                        app:chipIconTint="@color/mood_sad_tint"
+                        app:chipStartPadding="0dp"
+                        app:chipStrokeWidth="0dp"
+                        app:ensureMinTouchTargetSize="false"
+                        app:iconEndPadding="0dp"
+                        app:iconStartPadding="0dp"
+                        app:rippleColor="@android:color/transparent" />
                 </FrameLayout>
 
                 <TextView
                     style="@style/TextAppearance.Material3.BodySmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="sad"
+                    android:layout_gravity="center_horizontal"
                     android:gravity="center"
-                    android:layout_gravity="center_horizontal"/>
+                    android:text="@string/mood_sad" />
             </LinearLayout>
 
-            <!-- Angry -->
+            <!-- Angry column -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center_horizontal">
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
 
                 <FrameLayout
                     android:layout_width="56dp"
                     android:layout_height="56dp"
                     android:layout_gravity="center_horizontal"
-                    android:padding="4dp"
-                    android:clipToPadding="false">
+                    android:clipToPadding="false"
+                    android:padding="4dp">
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/chipAngry"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:minWidth="0dp"
-                        android:minHeight="0dp"
-                        android:text=""
-                        android:tag="Angry 😠"
+                        android:layout_gravity="center"
+                        android:contentDescription="@string/desc_mood_angry"
                         android:checkable="true"
                         android:clickable="true"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:tag="Angry 😠"
+                        android:text=""
                         app:checkedIconVisible="false"
                         app:chipBackgroundColor="@android:color/transparent"
-                        app:chipStrokeWidth="0dp"
-                        app:rippleColor="@android:color/transparent"
-                        app:ensureMinTouchTargetSize="false"
-                        app:chipStartPadding="0dp"
                         app:chipEndPadding="0dp"
-                        app:iconStartPadding="0dp"
-                        app:iconEndPadding="0dp"
                         app:chipIcon="@drawable/ic_mood_angry_selector"
-                        app:chipIconTint="@color/mood_angry_tint"
                         app:chipIconSize="48dp"
-                        android:layout_gravity="center"/>
+                        app:chipIconTint="@color/mood_angry_tint"
+                        app:chipStartPadding="0dp"
+                        app:chipStrokeWidth="0dp"
+                        app:ensureMinTouchTargetSize="false"
+                        app:iconEndPadding="0dp"
+                        app:iconStartPadding="0dp"
+                        app:rippleColor="@android:color/transparent" />
                 </FrameLayout>
 
                 <TextView
                     style="@style/TextAppearance.Material3.BodySmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="angry"
+                    android:layout_gravity="center_horizontal"
                     android:gravity="center"
-                    android:layout_gravity="center_horizontal"/>
+                    android:text="@string/mood_angry" />
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Sleep (single, optional) -->
+        <!-- ===================== Optional detail groups ===================== -->
+
+        <!-- Sleep (single-select, optional) -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/label_sleep_quality"
-            android:layout_marginTop="8dp" />
+            android:layout_marginTop="8dp"
+            android:text="@string/label_sleep_quality" />
 
+        <!-- Choice chips -->
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/sleepChipGroup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:singleSelection="true"
+            app:chipSpacingHorizontal="8dp"
+            app:chipSpacingVertical="8dp"
             app:selectionRequired="false"
             app:singleLine="false"
-            app:chipSpacingHorizontal="8dp"
-            app:chipSpacingVertical="8dp">
+            app:singleSelection="true">
 
             <com.google.android.material.chip.Chip
-                style="@style/Widget.Material3.Chip.Filter"
                 android:id="@+id/chipSleepGood"
+                style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checkable="true"
-                android:text="Good" />
+                android:text="@string/sleep_good" />
 
             <com.google.android.material.chip.Chip
-                style="@style/Widget.Material3.Chip.Filter"
                 android:id="@+id/chipSleepMedium"
+                style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checkable="true"
-                android:text="Medium" />
+                android:text="@string/sleep_medium" />
 
             <com.google.android.material.chip.Chip
-                style="@style/Widget.Material3.Chip.Filter"
                 android:id="@+id/chipSleepPoor"
+                style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checkable="true"
-                android:text="Poor" />
+                android:text="@string/sleep_poor" />
         </com.google.android.material.chip.ChipGroup>
 
-        <!-- Social (single, optional) -->
+        <!-- Social (single-select, optional) -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/label_social_activity"
-            android:layout_marginTop="8dp" />
+            android:layout_marginTop="8dp"
+            android:text="@string/label_social_activity" />
 
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/socialChipGroup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:singleSelection="true"
+            app:chipSpacingHorizontal="8dp"
+            app:chipSpacingVertical="8dp"
             app:selectionRequired="false"
             app:singleLine="false"
-            app:chipSpacingHorizontal="8dp"
-            app:chipSpacingVertical="8dp">
+            app:singleSelection="true">
 
             <com.google.android.material.chip.Chip
-                style="@style/Widget.Material3.Chip.Filter"
                 android:id="@+id/chipSocialFamily"
+                style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checkable="true"
-                android:text="Family"/>
+                android:text="@string/social_family" />
 
             <com.google.android.material.chip.Chip
-                style="@style/Widget.Material3.Chip.Filter"
                 android:id="@+id/chipSocialFriends"
+                style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checkable="true"
-                android:text="Friends"/>
+                android:text="@string/social_friends" />
 
             <com.google.android.material.chip.Chip
-                style="@style/Widget.Material3.Chip.Filter"
                 android:id="@+id/chipSocialDate"
+                style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checkable="true"
-                android:text="Date"/>
+                android:text="@string/social_date" />
 
             <com.google.android.material.chip.Chip
-                style="@style/Widget.Material3.Chip.Filter"
                 android:id="@+id/chipSocialParty"
+                style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checkable="true"
-                android:text="Party"/>
+                android:text="@string/social_party" />
         </com.google.android.material.chip.ChipGroup>
 
-        <!-- Hobby (single, optional) -->
+        <!-- Hobby (single-select, optional) -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/label_hobby"
-            android:layout_marginTop="8dp" />
+            android:layout_marginTop="8dp"
+            android:text="@string/label_hobby" />
 
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/hobbyChipGroup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:singleSelection="true"
+            app:chipSpacingHorizontal="8dp"
+            app:chipSpacingVertical="8dp"
             app:selectionRequired="false"
             app:singleLine="false"
-            app:chipSpacingHorizontal="8dp"
-            app:chipSpacingVertical="8dp">
+            app:singleSelection="true">
 
             <com.google.android.material.chip.Chip
-                style="@style/Widget.Material3.Chip.Filter"
                 android:id="@+id/chipHobbyMovies"
+                style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checkable="true"
-                android:text="Movies"/>
+                android:text="@string/hobby_movies" />
 
             <com.google.android.material.chip.Chip
-                style="@style/Widget.Material3.Chip.Filter"
                 android:id="@+id/chipHobbyReading"
+                style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checkable="true"
-                android:text="Reading"/>
+                android:text="@string/hobby_reading" />
 
             <com.google.android.material.chip.Chip
-                style="@style/Widget.Material3.Chip.Filter"
                 android:id="@+id/chipHobbyGames"
+                style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checkable="true"
-                android:text="Games"/>
+                android:text="@string/hobby_games" />
 
             <com.google.android.material.chip.Chip
-                style="@style/Widget.Material3.Chip.Filter"
                 android:id="@+id/chipHobbySport"
+                style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checkable="true"
-                android:text="Sport"/>
+                android:text="@string/hobby_sport" />
 
             <com.google.android.material.chip.Chip
-                style="@style/Widget.Material3.Chip.Filter"
                 android:id="@+id/chipHobbyRelaxation"
+                style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checkable="true"
-                android:text="Relaxation"/>
+                android:text="@string/hobby_relaxation" />
         </com.google.android.material.chip.ChipGroup>
 
-        <!-- Food (single, optional) -->
+        <!-- Food (single-select, optional) -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/label_food_type"
-            android:layout_marginTop="8dp" />
+            android:layout_marginTop="8dp"
+            android:text="@string/label_food_type" />
 
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/foodChipGroup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:singleSelection="true"
+            app:chipSpacingHorizontal="8dp"
+            app:chipSpacingVertical="8dp"
             app:selectionRequired="false"
             app:singleLine="false"
-            app:chipSpacingHorizontal="8dp"
-            app:chipSpacingVertical="8dp">
+            app:singleSelection="true">
 
             <com.google.android.material.chip.Chip
-                style="@style/Widget.Material3.Chip.Filter"
                 android:id="@+id/chipFoodHealthy"
+                style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checkable="true"
-                android:text="Healthy"/>
+                android:text="@string/food_healthy" />
 
             <com.google.android.material.chip.Chip
-                style="@style/Widget.Material3.Chip.Filter"
                 android:id="@+id/chipFoodFastFood"
+                style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checkable="true"
-                android:text="Fast Food"/>
+                android:text="@string/food_fastfood" />
 
             <com.google.android.material.chip.Chip
-                style="@style/Widget.Material3.Chip.Filter"
                 android:id="@+id/chipFoodHomemade"
+                style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checkable="true"
-                android:text="Homemade"/>
+                android:text="@string/food_homemade" />
 
             <com.google.android.material.chip.Chip
-                style="@style/Widget.Material3.Chip.Filter"
                 android:id="@+id/chipFoodRestaurant"
+                style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checkable="true"
-                android:text="Restaurant"/>
+                android:text="@string/food_restaurant" />
 
             <com.google.android.material.chip.Chip
-                style="@style/Widget.Material3.Chip.Filter"
                 android:id="@+id/chipFoodNoSugar"
+                style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checkable="true"
-                android:text="No Sugar"/>
+                android:text="@string/food_nosugar" />
         </com.google.android.material.chip.ChipGroup>
 
-        <!-- Note -->
+        <!-- Free-text note -->
         <EditText
             android:id="@+id/note"
             android:layout_width="match_parent"
@@ -504,14 +526,15 @@
             android:hint="@string/hint_moodNote"
             android:inputType="textMultiLine" />
 
-        <!-- Buttons -->
+        <!-- Action buttons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:layout_marginTop="16dp"
             android:gravity="center"
-            android:layout_marginTop="16dp">
+            android:orientation="horizontal">
 
+            <!-- Primary: Save/Add -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnAdd"
                 style="?attr/materialButtonStyle"
@@ -520,28 +543,29 @@
                 android:layout_weight="1"
                 android:text="@string/button_addMood"
                 app:icon="@android:drawable/ic_menu_save"
-                app:iconPadding="8dp"
-                app:iconGravity="textStart"/>
+                app:iconGravity="textStart"
+                app:iconPadding="8dp" />
 
             <Space
                 android:layout_width="16dp"
                 android:layout_height="wrap_content" />
 
+            <!-- Secondary: Cancel -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnCancel"
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Cancel"
+                android:text="@string/button_cancel"
                 android:textColor="@color/colorAccent"
-                app:strokeColor="@color/colorAccent"
-                app:strokeWidth="1dp"
                 app:icon="@android:drawable/ic_menu_close_clear_cancel"
-                app:iconTint="@color/colorAccent"
-                app:iconPadding="8dp"
                 app:iconGravity="textStart"
-                app:rippleColor="@color/colorAccent" />
+                app:iconPadding="8dp"
+                app:iconTint="@color/colorAccent"
+                app:rippleColor="@color/colorAccent"
+                app:strokeColor="@color/colorAccent"
+                app:strokeWidth="1dp" />
 
         </LinearLayout>
 

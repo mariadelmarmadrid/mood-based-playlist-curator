@@ -1,9 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <!-- ==========================
+         App Info
+         ========================== -->
     <string name="app_name">Mood-Based Playlist Curator</string>
 
-    <!-- Mood Input Labels and Hints -->
+
+    <!-- ==========================
+         Mood Input Labels & Hints
+         ========================== -->
     <string name="label_select_mood">Select your mood:</string>
-    <string name="hint_moodTitle">Enter your mood</string>
     <string name="hint_moodNote">Enter a note (optional)</string>
     <string name="label_sleep_quality">How was your sleep?</string>
     <string name="label_social_activity">Who did you spend time with?</string>
@@ -11,57 +18,71 @@
     <string name="label_food_type">What kind of food did you eat?</string>
 
 
-
-    <!-- Buttons and Menus -->
+    <!-- ==========================
+         Buttons & Menus
+         ========================== -->
     <string name="button_addMood">Add Mood</string>
-    <string name="menu_addMood">Add Mood</string>
     <string name="button_cancel">Cancel</string>
     <string name="button_delete">Delete</string>
     <string name="button_edit">Edit</string>
     <string name="update">Update Mood</string>
+
+    <!-- Navigation (used for chevron buttons in Insights) -->
     <string name="previous_day">Previous day</string>
     <string name="next_day">Next day</string>
 
 
+    <!-- ==========================
+         Mood Chips (Main 5)
+         ========================== -->
+    <string name="mood_happy">Happy</string>
+    <string name="mood_relaxed">Relaxed</string>
+    <string name="mood_neutral">Neutral</string>
+    <string name="mood_sad">Sad</string>
+    <string name="mood_angry">Angry</string>
 
-    <!-- Dropdown Options -->
-    <string-array name="mood_types">
-        <item>Happy</item>
-        <item>Relaxed</item>
-        <item>Neutral</item>
-        <item>Sad</item>
-        <item>Angry</item>
-    </string-array>
+    <!-- Accessibility descriptions for mood chips -->
+    <string name="desc_mood_happy">Happy mood</string>
+    <string name="desc_mood_relaxed">Relaxed mood</string>
+    <string name="desc_mood_neutral">Neutral mood</string>
+    <string name="desc_mood_sad">Sad mood</string>
+    <string name="desc_mood_angry">Angry mood</string>
 
-    <string-array name="sleep_quality">
-        <item>Good</item>
-        <item>Medium</item>
-        <item>Poor</item>
-    </string-array>
 
-    <string-array name="social_activity">
-        <item>Family</item>
-        <item>Friends</item>
-        <item>Date</item>
-        <item>Party</item>
-        <item>None</item>
-    </string-array>
+    <!-- ==========================
+         Sleep Quality Chips
+         ========================== -->
+    <string name="sleep_good">Good</string>
+    <string name="sleep_medium">Medium</string>
+    <string name="sleep_poor">Poor</string>
 
-    <string-array name="hobbies">
-        <item>Movies</item>
-        <item>Reading</item>
-        <item>Games</item>
-        <item>Sport</item>
-        <item>Relaxation</item>
-        <item>None</item>
-    </string-array>
 
-    <string-array name="food_types">
-        <item>Healthy</item>
-        <item>Fast Food</item>
-        <item>Homemade</item>
-        <item>Restaurant</item>
-        <item>No Sugar</item>
-        <item>None</item>
-    </string-array>
+    <!-- ==========================
+         Social Activity Chips
+         ========================== -->
+    <string name="social_family">Family</string>
+    <string name="social_friends">Friends</string>
+    <string name="social_date">Date</string>
+    <string name="social_party">Party</string>
+
+
+    <!-- ==========================
+         Hobby Chips
+         ========================== -->
+    <string name="hobby_movies">Movies</string>
+    <string name="hobby_reading">Reading</string>
+    <string name="hobby_games">Games</string>
+    <string name="hobby_sport">Sport</string>
+    <string name="hobby_relaxation">Relaxation</string>
+
+
+    <!-- ==========================
+         Food Type Chips
+         ========================== -->
+    <string name="food_healthy">Healthy</string>
+    <string name="food_fastfood">Fast Food</string>
+    <string name="food_homemade">Homemade</string>
+    <string name="food_restaurant">Restaurant</string>
+    <string name="food_nosugar">No Sugar</string>
+
 </resources>
