@@ -25,7 +25,7 @@
     <color name="bottomIconActive">@color/colorAccent</color>
     <color name="fabBlack">@color/colorAccent</color>
 
-    <!--  Legacy support (your previous sand tone) -->
+    <!--  Legacy support -->
     <color name="sand_50">@color/colorBackground</color>
     <color name="nav_icon_gray">@color/bottomIconDefault</color>
     <color name="nav_icon_black">@color/colorAccent</color>
