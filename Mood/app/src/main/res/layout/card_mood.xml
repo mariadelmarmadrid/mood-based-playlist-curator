@@ -1,124 +1,152 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?><!--
+  card_mood.xml
+  Layout for a single mood entry inside the daily summary list.
+  Displays:
+    - Mood type and timestamp (top row)
+    - Optional details (sleep, social, hobby, food)
+    - User note
+    - Edit and Delete action buttons
+
+  Used by:
+    • MoodAdapter.kt (for single-day views)
+    • DailyMoodAdapter.kt (to show multiple moods per day)
+-->
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="4dp"
-    android:elevation="4dp"
-    app:cardBackgroundColor="@color/white"
     android:clickable="false"
-    android:focusable="false">
+    android:elevation="4dp"
+    android:focusable="false"
+    app:cardBackgroundColor="@color/white">
 
+    <!-- Root container for card content -->
     <LinearLayout
-        android:orientation="vertical"
-        android:padding="8dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp">
 
-        <!-- Mood Type and Timestamp -->
+        <!-- ========== Top row: Mood type + timestamp ========== -->
         <LinearLayout
-            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
+            <!-- Mood title (e.g., Happy 😊) -->
             <TextView
                 android:id="@+id/moodTitle"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="@color/black"
                 android:layout_width="0dp"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_height="wrap_content"/>
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
+            <!-- Timestamp (only time, e.g., 14:32) -->
             <TextView
                 android:id="@+id/moodTimestamp"
-                android:textSize="10sp"
-                android:textColor="@color/gray"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:textColor="@color/gray"
+                android:textSize="10sp" />
         </LinearLayout>
 
-        <!-- Mood Details -->
+        <!-- ========== Middle section: Optional details ========== -->
+        <!--
+          Uses FlexboxLayout to wrap the small detail labels.
+          Only visible when data exists (sleep, social, hobby, food).
+        -->
         <com.google.android.flexbox.FlexboxLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:flexWrap="wrap"
-            app:justifyContent="flex_start"
             android:layout_marginTop="4dp"
-            android:layout_marginBottom="2dp">
+            android:layout_marginBottom="2dp"
+            app:flexWrap="wrap"
+            app:justifyContent="flex_start">
 
+            <!-- Sleep quality detail (e.g., 🛌 Good) -->
             <TextView
                 android:id="@+id/sleep"
-                android:textSize="12sp"
-                android:textColor="@color/gray"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="2dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:textColor="@color/gray"
+                android:textSize="12sp" />
 
+            <!-- Social activity detail (e.g., 👥 Friends) -->
             <TextView
                 android:id="@+id/social"
-                android:textSize="12sp"
-                android:textColor="@color/gray"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="2dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:textColor="@color/gray"
+                android:textSize="12sp" />
 
+            <!-- Hobby detail (e.g., 🎨 Reading) -->
             <TextView
                 android:id="@+id/hobby"
-                android:textSize="12sp"
-                android:textColor="@color/gray"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="2dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:textColor="@color/gray"
+                android:textSize="12sp" />
 
+            <!-- Food type detail (e.g., 🍽️ Homemade) -->
             <TextView
                 android:id="@+id/food"
-                android:textSize="12sp"
-                android:textColor="@color/gray"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="2dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:textColor="@color/gray"
+                android:textSize="12sp" />
         </com.google.android.flexbox.FlexboxLayout>
 
-        <!-- Note -->
+        <!-- ========== User note ========== -->
+        <!-- Optional note text entered by the user -->
         <TextView
             android:id="@+id/note"
-            android:textSize="14sp"
-            android:textColor="@color/black"
-            android:layout_marginTop="2dp"
-            android:layout_marginBottom="4dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="4dp"
             android:ellipsize="end"
-            android:maxLines="3"/>
+            android:maxLines="3"
+            android:textColor="@color/black"
+            android:textSize="14sp" />
 
-        <!-- Actions row -->
+        <!-- ========== Action buttons row ========== -->
+        <!--
+          Two ImageButtons aligned to the end:
+          - Edit: opens mood editing screen
+          - Delete: prompts confirmation before deletion
+        -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="end"
             android:paddingTop="4dp">
 
-            <!-- NEW: Edit button -->
+            <!-- Edit mood button -->
             <ImageButton
                 android:id="@+id/btnEdit"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:contentDescription="@string/button_edit"
-                android:clickable="true"
-                android:focusable="true"
                 android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:contentDescription="@string/button_edit"
+                android:focusable="true"
                 app:srcCompat="@drawable/ic_edit_24"
                 app:tint="@color/colorAccent" />
 
 
-            <!-- existing Delete button -->
+            <!-- Delete mood button -->
             <ImageButton
                 android:id="@+id/btnDelete"
                 android:layout_width="40dp"
@@ -127,10 +155,8 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/button_delete"
                 android:src="@drawable/ic_delete_24"
-                app:tint="@color/colorAccent"/>
+                app:tint="@color/colorAccent" />
         </LinearLayout>
-
-
 
 
     </LinearLayout>
