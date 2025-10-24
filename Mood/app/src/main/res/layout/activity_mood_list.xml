@@ -1,12 +1,19 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?><!--
+  Mood list screen
+  - Static top app bar with a filter action
+  - Slide-down filter card anchored under the app bar
+  - RecyclerView with day “cards” below
+  - Bottom navigation + center FAB
+-->
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/sand_50">
 
-    <!-- STATIC TOP BAR (like bottom bar) -->
+    <!-- ===== Top App Bar (fixed) =====
+         Hosts title + filter menu (menu_top)
+    -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBar"
         android:layout_width="match_parent"
@@ -19,32 +26,34 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:title="@string/app_name"
-            app:titleCentered="false"
-            app:navigationIcon="@null"
             app:menu="@menu/menu_top"
-            app:titleTextColor="@android:color/black"/>
+            app:navigationIcon="@null"
+            app:titleCentered="false"
+            app:titleTextColor="@android:color/black" />
 
-        <!-- thin divider under the bar to match a "static bar" look -->
+        <!-- Thin divider to suggest a static bar (no scroll) -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#1A000000"/>
+            android:background="#1A000000" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- FILTER CARD: ANCHORED BELOW THE APP BAR (no overlap with title) -->
+    <!-- ===== Filter Card (initially hidden) =====
+         Anchored under the app bar; shown/hidden with short slide animation
+    -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/filterCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_anchor="@id/appBar"
-        app:layout_anchorGravity="bottom"
         android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
         android:layout_marginTop="8dp"
-        android:visibility="gone"
+        android:layout_marginEnd="16dp"
         android:elevation="8dp"
+        android:visibility="gone"
         app:cardCornerRadius="16dp"
-        app:cardElevation="6dp">
+        app:cardElevation="6dp"
+        app:layout_anchor="@id/appBar"
+        app:layout_anchorGravity="bottom">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -52,20 +61,21 @@
             android:orientation="vertical"
             android:padding="12dp">
 
-            <!-- Search notes -->
+            <!-- Search notes (single-line TextInputLayout) -->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Search notes…">
+                android:hint="@string/search_notes_hint">
+
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputSearchNotes"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:imeOptions="actionSearch"
-                    android:singleLine="true"/>
+                    android:singleLine="true" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Date chips -->
+            <!-- Date range presets (single selection) -->
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/chipsDate"
                 android:layout_width="match_parent"
@@ -78,40 +88,41 @@
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="All dates"
                     android:checkable="true"
-                    android:checked="true"/>
+                    android:checked="true"
+                    android:text="@string/chip_all_dates" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipToday"
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Today"
-                    android:checkable="true"/>
+                    android:checkable="true"
+                    android:text="@string/chip_today" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipLast7"
                     style="@style/Widget.Material3.Chip.Filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Last 7 days"
-                    android:checkable="true"/>
+                    android:checkable="true"
+                    android:text="@string/chip_last7" />
             </com.google.android.material.chip.ChipGroup>
 
-            <!-- Daily average slider -->
+            <!-- Min daily average slider (−2..2 step 1) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="4dp">
+                android:layout_marginTop="4dp"
+                android:orientation="vertical">
 
+                <!-- Label updated live from code -->
                 <TextView
                     android:id="@+id/avgLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Min daily average: All"
-                    android:textAppearance="@style/TextAppearance.Material3.BodyMedium"/>
+                    android:text="@string/min_daily_avg_label"
+                    android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
 
                 <com.google.android.material.slider.Slider
                     android:id="@+id/sliderMinAvg"
@@ -120,65 +131,68 @@
                     android:valueFrom="-2"
                     android:valueTo="2"
                     android:stepSize="1"
-                    android:value="-2"/>
+                    android:value="-2"
+                    android:contentDescription="@string/mood_neutral" />
             </LinearLayout>
 
-            <!-- Actions -->
+            <!-- Filter actions (Reset/Apply) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:layout_marginTop="8dp"
                 android:gravity="end"
-                android:layout_marginTop="8dp">
+                android:orientation="horizontal">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnReset"
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Reset"
+                    android:text="@string/button_reset"
                     android:textColor="@color/colorAccent"
-                    app:strokeColor="@color/colorAccent"
-                    app:strokeWidth="1dp"
                     app:iconTint="@color/colorAccent"
-                    app:rippleColor="@color/colorAccent" />
+                    app:rippleColor="@color/colorAccent"
+                    app:strokeColor="@color/colorAccent"
+                    app:strokeWidth="1dp" />
 
-
+                <!-- Primary Apply action -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnApply"
                     style="@style/Widget.Material3.Button.TonalButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="Apply"/>
+                    android:text="@string/button_apply" />
             </LinearLayout>
 
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- LIST sits under the AppBar automatically -->
+    <!-- ===== RecyclerView (content) =====
+         Renders daily summaries (adapter supplies top/bottom padding at runtime)
+    -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
         android:paddingBottom="200dp"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-    <!-- Bottom nav -->
+    <!-- ===== Bottom Navigation ===== -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"
         android:layout_height="90dp"
         android:layout_gravity="bottom"
         android:background="@color/sand_50"
-        app:menu="@menu/menu_bottom"
-        app:labelVisibilityMode="unlabeled"
         app:itemIconTint="@color/bottom_nav_icon_tint"
+        app:itemRippleColor="@android:color/transparent"
         app:itemTextColor="@color/bottom_nav_text_tint"
-        app:itemRippleColor="@android:color/transparent" />
+        app:labelVisibilityMode="unlabeled"
+        app:menu="@menu/menu_bottom" />
 
-    <!-- Center FAB -->
+    <!-- ===== Center FAB (Add Mood) ===== -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAdd"
         android:layout_width="56dp"
@@ -188,6 +202,7 @@
         app:srcCompat="@drawable/ic_add_24"
         app:tint="@android:color/white"
         app:backgroundTint="@android:color/black"
-        app:useCompatPadding="true" />
+        app:useCompatPadding="true"
+        android:contentDescription="@string/button_addMood"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

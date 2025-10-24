@@ -17,6 +17,9 @@
     <string name="label_hobby">Which hobby did you do?</string>
     <string name="label_food_type">What kind of food did you eat?</string>
 
+    <!-- Search/filter hints -->
+    <string name="search_notes_hint">Search notes…</string>
+
 
     <!-- ==========================
          Buttons & Menus
@@ -26,6 +29,10 @@
     <string name="button_delete">Delete</string>
     <string name="button_edit">Edit</string>
     <string name="update">Update Mood</string>
+
+    <!-- Filter buttons -->
+    <string name="button_reset">Reset</string>
+    <string name="button_apply">Apply</string>
 
     <!-- Navigation (used for chevron buttons in Insights) -->
     <string name="previous_day">Previous day</string>
@@ -84,5 +91,15 @@
     <string name="food_homemade">Homemade</string>
     <string name="food_restaurant">Restaurant</string>
     <string name="food_nosugar">No Sugar</string>
+
+    <!-- Filter chips in Mood List screen -->
+    <string name="chip_all_dates">All dates</string>
+    <string name="chip_today">Today</string>
+    <string name="chip_last7">Last 7 days</string>
+
+    <!-- Filter label for daily average slider -->
+    <string name="min_daily_avg_label">Min daily average: All</string>
+
+
 
 </resources>
