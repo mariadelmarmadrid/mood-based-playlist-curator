@@ -1,49 +1,77 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?><!--
+  Layout representing one "day card" in the mood list.
+  Each card displays:
+    • The date header (e.g., "Sunday, 20 Oct 2025")
+    • A vertical list of that day's individual moods (each using card_mood.xml)
+    • A divider line
+    • The average mood summary for the day (e.g., "Average Mood: Relaxed 😌")
+
+  Used by:
+    • DailyMoodAdapter.kt  → binds DailyMoodSummary objects
+    • MoodListActivity.kt  → main list of daily cards
+-->
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    android:elevation="8dp"
-    android:background="@color/white">
+    android:background="@color/white"
+    android:elevation="8dp">
 
+    <!-- Root container for the card’s vertical content -->
     <LinearLayout
-        android:orientation="vertical"
-        android:padding="16dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <!-- Date header -->
+        <!-- ========== Header: Date ========== -->
+        <!--
+          Displays the date for this summary, e.g. "Sunday, 20 Oct 2025".
+          Set dynamically by DailyMoodAdapter.formatDateForHeader().
+        -->
         <TextView
             android:id="@+id/dateText"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/black"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
-        <!-- Moods container -->
+        <!-- ========== Moods Container ========== -->
+        <!--
+          Holds all Mood cards (card_mood.xml) for this date.
+          Each mood is dynamically inflated by DailyMoodAdapter.bind().
+        -->
         <LinearLayout
             android:id="@+id/moodsContainer"
-            android:orientation="vertical"
-            android:layout_marginTop="8dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical" />
 
-        <!-- Divider line -->
+        <!-- ========== Divider Line ========== -->
+        <!--
+          Thin gray line separating the list of moods from the daily average.
+        -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginTop="8dp"
             android:background="#CCCCCC" />
 
-        <!-- Average mood -->
+        <!-- ========== Footer: Average Mood ========== -->
+        <!--
+          Displays the computed daily average mood, e.g.:
+          "Average Mood: Relaxed 😌"
+          Value provided by DailyMoodAdapter.bind() based on mood scores.
+        -->
         <TextView
             android:id="@+id/averageMood"
-            android:textSize="16sp"
-            android:textStyle="italic"
-            android:textColor="@color/black"
-            android:layout_marginTop="8dp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="italic" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>
