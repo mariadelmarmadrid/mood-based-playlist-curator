@@ -536,12 +536,12 @@
             android:adjustViewBounds="true"
             android:visibility="gone" />
 
-        <!-- Row of buttons: Add / Remove photo -->
+        <!-- Buttons centered under photo -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="end"
+            android:gravity="center"
             android:layout_marginTop="8dp">
 
             <com.google.android.material.button.MaterialButton
@@ -552,8 +552,8 @@
                 android:text="@string/button_add_photo" />
 
             <Space
-                android:layout_width="8dp"
-                android:layout_height="0dp" />
+                android:layout_width="12dp"
+                android:layout_height="wrap_content" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnRemovePhoto"
@@ -563,7 +563,6 @@
                 android:text="@string/button_remove_photo"
                 android:visibility="gone" />
         </LinearLayout>
-
 
 
         <!-- Action buttons -->
