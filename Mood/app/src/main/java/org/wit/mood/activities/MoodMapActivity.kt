@@ -21,44 +21,78 @@ class MoodMapActivity : AppCompatActivity(), OnMapReadyCallback {
 
         binding = ActivityMoodMapBinding.inflate(layoutInflater)
         setContentView(binding.root)
-    }
 
+        // Find the map fragment from layout
+        val mapFragment = supportFragmentManager
+            .findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment.getMapAsync(this)
+    }
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
 
-        // Example mood spots (you can use Waterford / SETU coordinates etc.)
-        val happyCafe = LatLng(52.2457, -7.1391)   // example
-        val relaxedPark = LatLng(52.2460, -7.1400)
-        val sadCinema = LatLng(52.2448, -7.1385)
-        val angryGym = LatLng(52.2452, -7.1410)
+        // Center of SETU
+        val setuMain = LatLng(52.245520, -7.138682)
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(setuMain, 15f))
 
+        // === REAL PLACES AROUND SETU ===
+
+        // SETU Café
         map.addMarker(
             MarkerOptions()
-                .position(happyCafe)
-                .title("Happy place: Café ☕")
-                .snippet("Great coffee, cozy vibes")
-        )
-        map.addMarker(
-            MarkerOptions()
-                .position(relaxedPark)
-                .title("Relaxed place: Park 🌳")
-                .snippet("Nice for a walk and fresh air")
-        )
-        map.addMarker(
-            MarkerOptions()
-                .position(sadCinema)
-                .title("Sad movie spot 🎬")
-                .snippet("Perfect for crying at a movie 😅")
-        )
-        map.addMarker(
-            MarkerOptions()
-                .position(angryGym)
-                .title("Angry outlet: Gym 💪")
-                .snippet("Punch the stress out")
+                .position(LatLng(52.245657, -7.139112))
+                .title("SETU Café ☕")
+                .snippet("Nice place for a coffee or snack.")
         )
 
-        // Center camera roughly over the area
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(happyCafe, 15f))
+        // Arclabs Café
+        map.addMarker(
+            MarkerOptions()
+                .position(LatLng(52.242953, -7.137268))
+                .title("Arclabs Café ☕")
+                .snippet("Quiet café next to the innovation hub.")
+        )
+
+        // Library
+        map.addMarker(
+            MarkerOptions()
+                .position(LatLng(52.245505, -7.138104))
+                .title("Library 📚")
+                .snippet("Study, relax, or read.")
+        )
+
+        // Green area / small park
+        map.addMarker(
+            MarkerOptions()
+                .position(LatLng(52.244912, -7.137653))
+                .title("Campus Green 🌳")
+                .snippet("Nice area to relax outdoors.")
+        )
+
+        // Browns Road Park
+        map.addMarker(
+            MarkerOptions()
+                .position(LatLng(52.248879, -7.144149))
+                .title("Browns Road Park 🌳")
+                .snippet("Bigger park near SETU.")
+        )
+
+        // Harty's Takeaway
+        map.addMarker(
+            MarkerOptions()
+                .position(LatLng(52.247666, -7.138710))
+                .title("Harty’s Takeaway 🍔")
+                .snippet("Popular student food spot.")
+        )
+
+        // Kingfisher Gym
+        map.addMarker(
+            MarkerOptions()
+                .position(LatLng(52.247092, -7.143010))
+                .title("Kingfisher Gym 🏋️‍♂️")
+                .snippet("Great place to work out and destress.")
+        )
     }
+
+
 }
