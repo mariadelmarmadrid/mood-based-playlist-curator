@@ -57,15 +57,17 @@ class InsightsActivity : AppCompatActivity() {
         binding.bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
-                    // Navigate to list without animation flicker
                     startActivity(Intent(this, MoodListActivity::class.java))
                     overridePendingTransition(0, 0)
+                    finish()   // remove Insights from back stack
                     true
                 }
-                R.id.nav_chart -> true // already here
+                R.id.nav_chart -> true   // already here, do nothing
                 else -> false
             }
         }
+
+
         binding.bottomNav.setOnItemReselectedListener { /* keep current day */ }
 
         // --- FAB → add a new mood (comes back via getResult) ---

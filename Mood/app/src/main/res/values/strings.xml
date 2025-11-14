@@ -108,6 +108,8 @@
 
     <string name="button_open_playlist">Open Spotify playlist</string>
     <string name="error_no_spotify">Could not open Spotify playlist.</string>
+    <string name="title_activity_mood_map">Mood Map</string>
+
 
 
 </resources>

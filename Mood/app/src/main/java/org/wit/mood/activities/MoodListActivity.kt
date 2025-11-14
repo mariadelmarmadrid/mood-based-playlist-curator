@@ -152,11 +152,15 @@ class MoodListActivity : AppCompatActivity() {
                 R.id.nav_chart -> {
                     startActivity(Intent(this, InsightsActivity::class.java))
                     overridePendingTransition(0, 0)
+                    finish()      // remove Home from back stack
                     true
                 }
                 else -> false
             }
         }
+
+
+
         binding.bottomNav.setOnItemReselectedListener { /* no-op: keep position */ }
 
         // FAB → open add screen and refresh upon return
@@ -173,10 +177,19 @@ class MoodListActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.action_filter -> { toggleFilterPanel(); true }
+            R.id.action_filter -> {
+                toggleFilterPanel()
+                true
+            }
+            R.id.action_map -> {
+                startActivity(Intent(this, MoodMapActivity::class.java))
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
+
+
 
     // ------- Filtering pipeline (pure-ish functions + adapter wiring) -------
 

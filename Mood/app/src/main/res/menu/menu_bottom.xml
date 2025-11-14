@@ -1,34 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-  Defines the two navigation items displayed in the BottomNavigationView
-  shared between the Home screen (MoodListActivity) and the Insights screen
-  (InsightsActivity).
-
-  Each menu item includes:
-    • a unique ID (used for navigation handling)
-    • an icon (from drawable resources)
-    • a title (for accessibility and possible labeled mode)
--->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- ===== Home navigation item =====
-         Opens the main mood list screen (MoodListActivity).
-         ID: nav_home
-         Icon: ic_home_24 (house)
-         Title: "Home"
-    -->
+
     <item
         android:id="@+id/nav_home"
         android:icon="@drawable/ic_home_24"
         android:title="Home" />
 
-    <!-- ===== Insights navigation item =====
-         Opens the insights/analytics screen (InsightsActivity).
-         ID: nav_chart
-         Icon: ic_bar_chart_24 (bar chart)
-         Title: "Insights"
-    -->
     <item
         android:id="@+id/nav_chart"
         android:icon="@drawable/ic_bar_chart_24"
         android:title="Insights" />
+
 </menu>
