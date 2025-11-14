@@ -11,6 +11,7 @@ activity = "1.11.0"
 constraintlayout = "2.2.1"
 timber = "1.5.1"
 kotlinPlugin = "2.2.10"
+coil = "2.7.0"
 
 
 [libraries]
@@ -23,6 +24,7 @@ material = { group = "com.google.android.material", name = "material", version.r
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 timber = { module = "com.github.ajalt:timberkt", version.ref = "timber" }
+coil = { module = "io.coil-kt:coil", version.ref = "coil" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -1,7 +1,12 @@
 package org.wit.mood.activities
 
+import android.net.Uri
 import android.os.Bundle
+import android.view.View
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import coil.load
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.snackbar.Snackbar
@@ -21,7 +26,6 @@ import java.time.format.DateTimeFormatter
  *
  * Persists data via MainApp.moods (JSON store).
  */
-
 class MoodActivity : AppCompatActivity() {
 
     // ViewBinding for this layout (type-safe access to views)
@@ -32,6 +36,19 @@ class MoodActivity : AppCompatActivity() {
 
     // Holds the mood being edited; null = create mode
     private var editingMood: MoodModel? = null
+
+    // Image state (optional per note)
+    private var selectedPhotoUri: Uri? = null
+
+    // Modern Photo Picker (no storage permissions needed)
+    private val pickImage = registerForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            selectedPhotoUri = uri
+            showPhoto(uri)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,10 +70,9 @@ class MoodActivity : AppCompatActivity() {
         // Default selection for brand-new entries
         binding.chipNeutral.isChecked = true
 
-        // --- EDIT MODE: if a MoodModel was passed in, pre-fill the form and switch button text ---
+        // --- EDIT MODE: pre-fill the form and swap button label to "Update" ---
         editingMood = intent.getParcelableExtra("mood_edit")
         editingMood?.let { m ->
-            // Select the main mood chip that matches the existing entry
             when (m.type) {
                 MoodType.HAPPY   -> binding.chipHappy.isChecked = true
                 MoodType.RELAXED -> binding.chipRelaxed.isChecked = true
@@ -65,13 +81,13 @@ class MoodActivity : AppCompatActivity() {
                 MoodType.ANGRY   -> binding.chipAngry.isChecked = true
             }
 
-            // Pre-select OPTIONAL detail chips only if the value exists on the model
-            selectChipByText(binding.sleepChipGroup,   m.sleep?.name?.lowercase()?.replaceFirstChar { it.uppercase() })
-            selectChipByText(binding.socialChipGroup,  m.social?.name?.lowercase()?.replaceFirstChar { it.uppercase() })
-            selectChipByText(binding.hobbyChipGroup,   m.hobby?.name?.lowercase()?.replaceFirstChar { it.uppercase() })
-            selectChipByText(binding.foodChipGroup,    m.food?.name?.lowercase()?.replace('_',' ')?.replaceFirstChar { it.uppercase() })
+            // Pre-select OPTIONAL detail chips
+            selectChipByText(binding.sleepChipGroup,  m.sleep?.name?.lowercase()?.replaceFirstChar { it.uppercase() })
+            selectChipByText(binding.socialChipGroup, m.social?.name?.lowercase()?.replaceFirstChar { it.uppercase() })
+            selectChipByText(binding.hobbyChipGroup,  m.hobby?.name?.lowercase()?.replaceFirstChar { it.uppercase() })
+            selectChipByText(binding.foodChipGroup,   m.food?.name?.lowercase()?.replace('_',' ')?.replaceFirstChar { it.uppercase() })
 
-            // Prefill note and swap the button label to "Update"
+            // Prefill note and title the button "Update"
             binding.note.setText(m.note)
             binding.btnAdd.text = getString(R.string.update)
         }
@@ -79,9 +95,26 @@ class MoodActivity : AppCompatActivity() {
         // Primary actions
         binding.btnAdd.setOnClickListener { onSaveClicked() }
         binding.btnCancel.setOnClickListener { finish() }
+
+        // Photo actions
+        binding.btnAddPhoto.setOnClickListener {
+            pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        }
+        binding.btnRemovePhoto.setOnClickListener {
+            selectedPhotoUri = null
+            binding.photoPreview.visibility = View.GONE
+            binding.btnRemovePhoto.visibility = View.GONE
+        }
+
+        // If editing and there is an existing photo, show it
+        editingMood?.photoUri?.let {
+            selectedPhotoUri = Uri.parse(it)
+            showPhoto(selectedPhotoUri!!)
+        }
     }
 
     // ---------- Actions ----------
+
     /**
      * Validate inputs, then either CREATE a new mood or UPDATE the existing one.
      * Shows a brief Snackbar for feedback and finishes the Activity with RESULT_OK.
@@ -102,7 +135,6 @@ class MoodActivity : AppCompatActivity() {
 
         if (editingMood == null) {
             // --- CREATE path ---
-            // Timestamp format used consistently across the app
             val timestamp = LocalDateTime.now()
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
 
@@ -113,14 +145,14 @@ class MoodActivity : AppCompatActivity() {
                 social = social,
                 hobby = hobby,
                 food = food,
-                timestamp = timestamp
+                timestamp = timestamp,
+                photoUri = selectedPhotoUri?.toString() // ✅ SAVE image on create
             )
             app.moods.create(newMood)
             i("Mood created: $newMood")
             Snackbar.make(binding.root, "Mood added!", Snackbar.LENGTH_SHORT).show()
         } else {
             // --- UPDATE path ---
-            // Keep the original id and timestamp to preserve history ordering
             val updated = editingMood!!.copy(
                 type = selectedType,
                 note = binding.note.text?.toString().orEmpty(),
@@ -128,7 +160,8 @@ class MoodActivity : AppCompatActivity() {
                 social = social,
                 hobby = hobby,
                 food = food,
-                timestamp = editingMood!!.timestamp
+                timestamp = editingMood!!.timestamp, // keep original ordering
+                photoUri = selectedPhotoUri?.toString() // ✅ SAVE (or clear) on update
             )
             app.moods.update(updated)
             i("Mood updated: $updated")
@@ -142,26 +175,18 @@ class MoodActivity : AppCompatActivity() {
 
     // ---------- Helpers ----------
 
-    /**
-     * Makes a set of Chips act like a single-choice group.
-     * Only one chip can be checked at a time.
-     */
+    /** Makes a set of Chips act like a single-choice group. */
     private fun wireSingleSelectChips(vararg chips: Chip) {
         chips.forEach { chip ->
             chip.setOnCheckedChangeListener { button, isChecked ->
                 if (isChecked) {
-                    // Uncheck every other chip
                     chips.filter { it.id != button.id }.forEach { it.isChecked = false }
                 }
             }
         }
     }
 
-    /**
-     * Returns the main MoodType based on which emoji chip is checked.
-     * NOTE: This matches chip.tag (string) to MoodType.label; keep labels in sync.
-     * Consider tagging chips with the enum directly for extra safety.
-     */
+    /** Returns the main MoodType based on which emoji chip is checked. */
     private fun selectedMoodTypeOrNull(): MoodType? {
         val checkedChip = listOf(
             binding.chipHappy,
@@ -175,11 +200,7 @@ class MoodActivity : AppCompatActivity() {
         return MoodType.values().firstOrNull { it.label == labelFromTag }
     }
 
-    // ---- Converters & small utilities ----
-
-    /**
-     * @return the displayed text of the selected Chip in a ChipGroup, or null if none selected.
-     */
+    /** Selected chip text in a group (or null). */
     private fun selectedChipText(group: ChipGroup): String? {
         val id = group.checkedChipId
         if (id == -1) return null
@@ -188,7 +209,6 @@ class MoodActivity : AppCompatActivity() {
     }
 
     // Map label text → enum value (null if no selection).
-    // NOTE: depends on the Chip text exactly matching the enum name (with casing/spaces handled below).n
     private fun sleepFromChip(text: String?): SleepQuality? =
         text?.let { SleepQuality.valueOf(it.uppercase()) }
 
@@ -201,11 +221,7 @@ class MoodActivity : AppCompatActivity() {
     private fun foodFromChip(text: String?): FoodType? =
         text?.let { FoodType.valueOf(it.replace(" ", "_").uppercase()) }
 
-    /**
-     * Pre-select a Chip in a group by its displayed text (case sensitive).
-     * Used in edit mode to restore previous choices.
-     * NOTE: This is string-based; if you localize, consider enum tags instead.
-     */
+    /** Pre-select a Chip in a group by its displayed text (case sensitive). */
     private fun selectChipByText(group: ChipGroup, text: String?) {
         if (text.isNullOrEmpty()) return
         for (i in 0 until group.childCount) {
@@ -215,5 +231,12 @@ class MoodActivity : AppCompatActivity() {
                 return
             }
         }
+    }
+
+    /** Show the picked photo in the preview area. */
+    private fun showPhoto(uri: Uri) {
+        binding.photoPreview.load(uri)   // Coil handles URI loading & caching
+        binding.photoPreview.visibility = View.VISIBLE
+        binding.btnRemovePhoto.visibility = View.VISIBLE
     }
 }

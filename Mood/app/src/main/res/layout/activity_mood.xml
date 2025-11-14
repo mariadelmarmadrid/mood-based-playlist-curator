@@ -65,9 +65,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_gravity="center"
-                        android:contentDescription="@string/desc_mood_happy"
                         android:checkable="true"
                         android:clickable="true"
+                        android:contentDescription="@string/desc_mood_happy"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
                         android:minWidth="0dp"
@@ -118,9 +118,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_gravity="center"
-                        android:contentDescription="@string/desc_mood_relaxed"
                         android:checkable="true"
                         android:clickable="true"
+                        android:contentDescription="@string/desc_mood_relaxed"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
                         android:minWidth="0dp"
@@ -170,9 +170,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_gravity="center"
-                        android:contentDescription="@string/desc_mood_neutral"
                         android:checkable="true"
                         android:clickable="true"
+                        android:contentDescription="@string/desc_mood_neutral"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
                         android:minWidth="0dp"
@@ -222,9 +222,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_gravity="center"
-                        android:contentDescription="@string/desc_mood_sad"
                         android:checkable="true"
                         android:clickable="true"
+                        android:contentDescription="@string/desc_mood_sad"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
                         android:minWidth="0dp"
@@ -274,9 +274,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_gravity="center"
-                        android:contentDescription="@string/desc_mood_angry"
                         android:checkable="true"
                         android:clickable="true"
+                        android:contentDescription="@string/desc_mood_angry"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
                         android:minWidth="0dp"
@@ -525,6 +525,46 @@
             android:layout_height="wrap_content"
             android:hint="@string/hint_moodNote"
             android:inputType="textMultiLine" />
+
+        <!-- ======= Optional photo preview ======= -->
+        <ImageView
+            android:id="@+id/photoPreview"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="12dp"
+            android:scaleType="centerCrop"
+            android:adjustViewBounds="true"
+            android:visibility="gone" />
+
+        <!-- Row of buttons: Add / Remove photo -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end"
+            android:layout_marginTop="8dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAddPhoto"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/button_add_photo" />
+
+            <Space
+                android:layout_width="8dp"
+                android:layout_height="0dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRemovePhoto"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/button_remove_photo"
+                android:visibility="gone" />
+        </LinearLayout>
+
+
 
         <!-- Action buttons -->
         <LinearLayout
