@@ -104,13 +104,19 @@ class MoodActivity : AppCompatActivity() {
             selectedPhotoUri = null
             binding.photoPreview.visibility = View.GONE
             binding.btnRemovePhoto.visibility = View.GONE
+            binding.btnAddPhoto.text = getString(R.string.button_add_photo) // Reset
         }
+
 
         // If editing and there is an existing photo, show it
         editingMood?.photoUri?.let {
             selectedPhotoUri = Uri.parse(it)
             showPhoto(selectedPhotoUri!!)
+        } ?: run {
+            // No photo loaded yet
+            binding.btnAddPhoto.text = getString(R.string.button_add_photo)
         }
+
     }
 
     // ---------- Actions ----------
@@ -235,8 +241,12 @@ class MoodActivity : AppCompatActivity() {
 
     /** Show the picked photo in the preview area. */
     private fun showPhoto(uri: Uri) {
-        binding.photoPreview.load(uri)   // Coil handles URI loading & caching
+        binding.photoPreview.load(uri)
         binding.photoPreview.visibility = View.VISIBLE
+
+        // When a photo exists:
+        binding.btnAddPhoto.text = getString(R.string.button_change_photo)
         binding.btnRemovePhoto.visibility = View.VISIBLE
     }
+
 }
