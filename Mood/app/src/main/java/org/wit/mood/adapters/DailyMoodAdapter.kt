@@ -1,6 +1,7 @@
 package org.wit.mood.adapters
 
 import android.app.AlertDialog
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +15,8 @@ import org.wit.mood.models.MoodModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import coil.load
+
 
 /**
  * Adapter that displays a list of DailyMoodSummary objects — one card per day.
@@ -98,6 +101,16 @@ class DailyMoodAdapter(
                 moodView.moodTitle.text = mood.type.label     // e.g., "Happy 😊" (from enums)
                 moodView.moodTimestamp.text = onlyTime(mood.timestamp)
                 moodView.note.text = mood.note
+
+                val uri = mood.photoUri
+                with(moodView.moodImage) {
+                    if (!uri.isNullOrEmpty()) {
+                        visibility = View.VISIBLE
+                        load(Uri.parse(uri))
+                    } else {
+                        visibility = View.GONE
+                    }
+                }
 
                 // Optional attributes (only visible when present)
                 setRow(moodView.sleep,  "🛌",  mood.sleep)

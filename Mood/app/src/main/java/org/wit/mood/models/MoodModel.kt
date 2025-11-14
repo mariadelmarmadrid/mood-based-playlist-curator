@@ -19,24 +19,15 @@ import java.time.format.DateTimeFormatter
  */
 @Parcelize
 data class MoodModel(
-    /** Unique ID for the mood (assigned by the data store). */
     var id: Long = 0L,
-    /** The main mood selected by the user. Default = NEUTRAL. */
     var type: MoodType = MoodType.NEUTRAL,
-    /** Optional free-text note entered by the user. */
     var note: String = "",
-
-    // --- Optional context fields (nullable = "not selected") ---
     var sleep: SleepQuality? = null,
     var social: SocialActivity? = null,
     var hobby: Hobby? = null,
     var food: FoodType? = null,
-
-    /**
-     * Timestamp of when this mood entry was created.
-     * Stored as a formatted string: "yyyy-MM-dd HH:mm:ss".
-     */
-    var timestamp: String = LocalDateTime.now().format(
-        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-    )
+    var timestamp: String = LocalDateTime.now()
+        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+    var photoUri: String? = null
 ) : Parcelable
+

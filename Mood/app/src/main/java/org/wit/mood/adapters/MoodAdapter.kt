@@ -1,11 +1,15 @@
 package org.wit.mood.adapters
 
+import android.net.Uri
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import org.wit.mood.databinding.CardMoodBinding
 import org.wit.mood.models.MoodModel
+import coil.load
+
 
 /**
  * Adapter that displays individual mood entries inside a day's card (RecyclerView).
@@ -67,6 +71,16 @@ class MoodAdapter(
             moodTitle.text = mood.type.label                     // Mood title
             moodTimestamp.text = onlyTime(mood.timestamp)   // Extract "HH:mm" from full timestamp
             note.text = mood.note
+
+            val uri = mood.photoUri
+            with(moodImage) {
+                if (!uri.isNullOrEmpty()) {
+                    visibility = View.VISIBLE
+                    load(Uri.parse(uri))
+                } else {
+                    visibility = View.GONE
+                }
+            }
 
             // --- Optional attributes (hide if null) ---
             // Each helper adds an emoji + label or hides the TextView entirely.

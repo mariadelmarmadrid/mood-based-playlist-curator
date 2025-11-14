@@ -101,5 +101,11 @@
     <string name="min_daily_avg_label">Min daily average: All</string>
 
 
+    <string name="mood_photo">Mood photo</string>
+    <string name="button_add_photo">Add photo</string>
+    <string name="button_remove_photo">Remove photo</string>
+
+
+
 
 </resources>

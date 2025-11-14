@@ -121,6 +121,16 @@
             android:textColor="@color/black"
             android:textSize="14sp" />
 
+        <ImageView
+            android:id="@+id/moodImage"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:scaleType="centerCrop"
+            android:layout_marginBottom="4dp"
+            android:visibility="gone"
+            android:contentDescription="@string/mood_photo" />
+
+
         <!-- ========== Action buttons row ========== -->
         <!--
           Two ImageButtons aligned to the end:

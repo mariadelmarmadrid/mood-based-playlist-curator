@@ -49,6 +49,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
 
     implementation(libs.timber)
+    implementation(libs.coil)
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.google.android.flexbox:flexbox:3.0.0")
     implementation("com.google.android.material:material:1.12.0")
