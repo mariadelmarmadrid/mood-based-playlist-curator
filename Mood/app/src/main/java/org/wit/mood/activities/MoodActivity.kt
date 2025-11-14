@@ -1,5 +1,6 @@
 package org.wit.mood.activities
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -45,10 +46,20 @@ class MoodActivity : AppCompatActivity() {
         ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         if (uri != null) {
+            // 🔹 Persist read permission so we can still use this URI after app restart
+            val flag = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            try {
+                contentResolver.takePersistableUriPermission(uri, flag)
+            } catch (e: SecurityException) {
+                // On some devices/flows this might not be allowed; log but don't crash
+                e.printStackTrace()
+            }
+
             selectedPhotoUri = uri
             showPhoto(uri)
         }
     }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -113,7 +124,6 @@ class MoodActivity : AppCompatActivity() {
             selectedPhotoUri = Uri.parse(it)
             showPhoto(selectedPhotoUri!!)
         } ?: run {
-            // No photo loaded yet
             binding.btnAddPhoto.text = getString(R.string.button_add_photo)
         }
 
@@ -126,21 +136,19 @@ class MoodActivity : AppCompatActivity() {
      * Shows a brief Snackbar for feedback and finishes the Activity with RESULT_OK.
      */
     private fun onSaveClicked() {
-        // Must have one main mood selected
         val selectedType = selectedMoodTypeOrNull()
         if (selectedType == null) {
             Snackbar.make(binding.root, "Please select a mood!", Snackbar.LENGTH_SHORT).show()
             return
         }
 
-        // Read OPTIONAL details (null when nothing chosen)
         val sleep  = sleepFromChip(  selectedChipText(binding.sleepChipGroup))
         val social = socialFromChip( selectedChipText(binding.socialChipGroup))
         val hobby  = hobbyFromChip(  selectedChipText(binding.hobbyChipGroup))
         val food   = foodFromChip(   selectedChipText(binding.foodChipGroup))
 
         if (editingMood == null) {
-            // --- CREATE path ---
+            // CREATE
             val timestamp = LocalDateTime.now()
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
 
@@ -152,13 +160,12 @@ class MoodActivity : AppCompatActivity() {
                 hobby = hobby,
                 food = food,
                 timestamp = timestamp,
-                photoUri = selectedPhotoUri?.toString() // ✅ SAVE image on create
+                photoUri = selectedPhotoUri?.toString()
             )
             app.moods.create(newMood)
-            i("Mood created: $newMood")
             Snackbar.make(binding.root, "Mood added!", Snackbar.LENGTH_SHORT).show()
         } else {
-            // --- UPDATE path ---
+            // UPDATE (keep original id + timestamp)
             val updated = editingMood!!.copy(
                 type = selectedType,
                 note = binding.note.text?.toString().orEmpty(),
@@ -166,15 +173,13 @@ class MoodActivity : AppCompatActivity() {
                 social = social,
                 hobby = hobby,
                 food = food,
-                timestamp = editingMood!!.timestamp, // keep original ordering
-                photoUri = selectedPhotoUri?.toString() // ✅ SAVE (or clear) on update
+                timestamp = editingMood!!.timestamp,
+                photoUri = selectedPhotoUri?.toString()
             )
             app.moods.update(updated)
-            i("Mood updated: $updated")
             Snackbar.make(binding.root, "Mood updated!", Snackbar.LENGTH_SHORT).show()
         }
 
-        // Let the caller (e.g., list screen) know something changed
         setResult(RESULT_OK)
         finish()
     }
