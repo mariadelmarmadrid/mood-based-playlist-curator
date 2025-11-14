@@ -15,6 +15,10 @@ import org.wit.mood.databinding.ActivityInsightsBinding
 import org.wit.mood.main.MainApp
 import org.wit.mood.models.DailyMoodSummary
 import org.wit.mood.models.MoodType
+import android.content.ActivityNotFoundException
+import android.net.Uri
+import com.google.android.material.snackbar.Snackbar
+
 
 /**
  * Insights screen:
@@ -31,6 +35,9 @@ class InsightsActivity : AppCompatActivity() {
     // Full list of day summaries and the current index being shown (0 = newest)
     private var days: List<DailyMoodSummary> = emptyList()
     private var index = 0 // 0 = newest day
+
+    private var currentPlaylistUrl: String? = null
+
 
     // Return from add/edit screen → if OK, reload summaries
     private val getResult =
@@ -76,6 +83,11 @@ class InsightsActivity : AppCompatActivity() {
             if (index > 0) { index--; renderDay() }
         }
 
+        binding.btnOpenPlaylist.setOnClickListener {
+            val url = currentPlaylistUrl ?: return@setOnClickListener
+            openSpotifyPlaylist(url)
+        }
+
         // Initial load and render
         reloadDays()
     }
@@ -104,33 +116,45 @@ class InsightsActivity : AppCompatActivity() {
             binding.legend.removeAllViews()
             binding.btnPrevDay.isEnabled = false
             binding.btnNextDay.isEnabled = false
+
+            // no playlist for empty state
+            currentPlaylistUrl = null
+            binding.btnOpenPlaylist.visibility = View.GONE
             return
         }
 
         val day = days[index]
         binding.tvDate.text = day.date
 
-        // Human-friendly label derived from numeric average
+        val avgScore = day.averageScore
         val avgLabel = when {
-            day.averageScore >= 1.5 -> "Happy 😊"
-            day.averageScore >= 0.5 -> "Relaxed 😌"
-            day.averageScore >= -0.5 -> "Neutral 😐"
-            day.averageScore >= -1.5 -> "Sad 😢"
+            avgScore >= 1.5 -> "Happy 😊"
+            avgScore >= 0.5 -> "Relaxed 😌"
+            avgScore >= -0.5 -> "Neutral 😐"
+            avgScore >= -1.5 -> "Sad 😢"
             else -> "Angry 😠"
         }
         binding.tvAverage.text = "Average: $avgLabel"
 
-        // Build counts per mood for the ring + legend
+        // ---- NEW: pick playlist based on avgScore ----
+        currentPlaylistUrl = playlistUrlFor(avgScore)
+        if (currentPlaylistUrl == null) {
+            binding.btnOpenPlaylist.visibility = View.GONE
+        } else {
+            binding.btnOpenPlaylist.visibility = View.VISIBLE
+        }
+
+        // existing ring + legend code stays the same
         val counts = MoodType.values().associateWith { m ->
             day.moods.count { it.type == m }
         }
         binding.moodRing.setData(counts, avgLabel)
         renderLegend(counts)
 
-        // Enable/disable day-nav chevrons at ends
         binding.btnPrevDay.isEnabled = index < days.lastIndex
         binding.btnNextDay.isEnabled = index > 0
     }
+
 
     /**
      * Inflate and bind a legend row per mood:
@@ -202,4 +226,41 @@ class InsightsActivity : AppCompatActivity() {
             DailyMoodSummary(date = date, moods = sorted, averageScore = avg)
         }.sortedByDescending { it.date } // newest first
     }
+
+    // Map numeric average to one of your 5 playlist URLs
+    private fun playlistUrlFor(avgScore: Double): String? = when {
+        avgScore >= 1.5  -> "https://open.spotify.com/playlist/0jrlHA5UmxRxJjoykf7qRY?si=nIQRZZctSweuaJ-hFQ0ezA&pi=wgl1rOciSwSfm"
+        avgScore >= 0.5  -> "https://open.spotify.com/playlist/7mBi5NbnmRIw60o8GCWHDg?si=6aFrE9oBQ3KYxkXErRcSFg&pi=EHZ5weKLSWyBn"
+        avgScore >= -0.5 -> "https://open.spotify.com/playlist/37i9dQZF1EIcJuX6lvhrpW?si=UQi7HmGwQHmSKT-8ZJhBMQ&pi=w8QhyZiIRAmC8"
+        avgScore >= -1.5 -> "https://open.spotify.com/playlist/4bRQf8bwAIVgCb6Lcoursx?si=VHWLE9zPTSGNxfVk1OZ2JQ&pi=PoH0HGsGQVSKH"
+        else             -> "https://open.spotify.com/playlist/67STztGl7srSMNn6hVYPFR?si=YzgRdjzXTK-_pxca1ijBtA&pi=PSAWWS2PT_O8A"
+        // You can return null if you ever want "no playlist" for some range
+    }
+
+    // Try Spotify app first; if missing, fall back to browser
+    private fun openSpotifyPlaylist(url: String) {
+        val uri = Uri.parse(url)
+
+        // 1) Try open directly in Spotify app
+        val spotifyIntent = Intent(Intent.ACTION_VIEW, uri).apply {
+            setPackage("com.spotify.music")
+        }
+        try {
+            startActivity(spotifyIntent)
+            return
+        } catch (_: ActivityNotFoundException) {
+            // Spotify not installed – fall back to browser
+        }
+
+        // 2) Fallback: open in any browser
+        val webIntent = Intent(Intent.ACTION_VIEW, uri)
+        try {
+            startActivity(webIntent)
+        } catch (_: Exception) {
+            // nothing can handle it
+            Snackbar.make(binding.root, getString(R.string.error_no_spotify), Snackbar.LENGTH_SHORT)
+                .show()
+        }
+    }
+
 }

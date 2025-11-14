@@ -106,6 +106,8 @@
     <string name="button_remove_photo">Remove photo</string>
     <string name="button_change_photo">Change photo</string>
 
+    <string name="button_open_playlist">Open Spotify playlist</string>
+    <string name="error_no_spotify">Could not open Spotify playlist.</string>
 
 
 </resources>

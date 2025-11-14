@@ -108,6 +108,7 @@
                  Shows the qualitative average (e.g., "Average: Relaxed 😌")
                  Text set in renderDay()
             -->
+
             <TextView
                 android:id="@+id/tvAverage"
                 android:layout_width="wrap_content"
@@ -116,6 +117,13 @@
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 android:textStyle="italic" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnOpenPlaylist"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/button_open_playlist" />
 
             <!-- ===== Legend (icons + counts + labels) =====
                  Flexbox wraps legend items across lines and centers them
