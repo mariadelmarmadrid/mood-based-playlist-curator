@@ -22,7 +22,6 @@ class MoodMapActivity : AppCompatActivity(), OnMapReadyCallback {
         binding = ActivityMoodMapBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Find the map fragment from layout
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
@@ -31,68 +30,113 @@ class MoodMapActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
 
-        // Center of SETU
-        val setuMain = LatLng(52.245520, -7.138682)
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(setuMain, 15f))
-
-        // === REAL PLACES AROUND SETU ===
-
-        // SETU Café
-        map.addMarker(
-            MarkerOptions()
-                .position(LatLng(52.245657, -7.139112))
-                .title("SETU Café ☕")
-                .snippet("Nice place for a coffee or snack.")
+        // -------------------------------
+        // 1. HAPPY LOCATIONS 😊
+        // -------------------------------
+        val happyMarkers = listOf(
+            Triple(
+                LatLng(52.246003781438574, -7.138020258486807),
+                "Happy place: Centra Viking Food Hall ☕",
+                "Bright, social atmosphere — good for positive energy"
+            ),
+            Triple(
+                LatLng(52.24531520331995, -7.140800329642434),
+                "Happy place: Student Hub 🎉",
+                "Lively space where you naturally feel upbeat"
+            )
         )
 
-        // Arclabs Café
-        map.addMarker(
-            MarkerOptions()
-                .position(LatLng(52.242953, -7.137268))
-                .title("Arclabs Café ☕")
-                .snippet("Quiet café next to the innovation hub.")
+        // -------------------------------
+        // 2. RELAXED LOCATIONS 😌
+        // -------------------------------
+        val relaxedMarkers = listOf(
+            Triple(
+                LatLng(52.24072650189237, -7.124451987984857),
+                "Relaxed place: Waterford Nature Park 🌿",
+                "Open green space perfect for slowing down and breathing"
+            ),
+            Triple(
+                LatLng(52.27001966241276, -7.1375516589339965),
+                "Relaxed place: Greenway Trail Start \uD83D\uDEB6\u200D♀\uFE0F",
+                "Great starting point for a relaxing walk surrounded by nature"
+            )
         )
 
-        // Library
-        map.addMarker(
-            MarkerOptions()
-                .position(LatLng(52.245505, -7.138104))
-                .title("Library 📚")
-                .snippet("Study, relax, or read.")
+        // -------------------------------
+        // 3. NEUTRAL LOCATIONS 😐
+        // -------------------------------
+        val neutralMarkers = listOf(
+            Triple(
+                LatLng(52.24476934377214, -7.142239168927888),
+                "Neutral spot: Fuel Station ⛽",
+                "A routine stop — fuel, snacks, or just passing through"
+            ),
+            Triple(
+                LatLng(52.24508427507819, -7.137684557067292),
+                "Neutral spot: Bus Stop 🚏",
+                "Simple everyday location where moods tend to be neutral"
+            )
         )
 
-        // Green area / small park
-        map.addMarker(
-            MarkerOptions()
-                .position(LatLng(52.244912, -7.137653))
-                .title("Campus Green 🌳")
-                .snippet("Nice area to relax outdoors.")
+        // -------------------------------
+        // 4. SAD LOCATIONS 😢
+        // -------------------------------
+        val sadMarkers = listOf(
+            Triple(
+                LatLng(52.24535559769644, -7.138168843282043),
+                "Sad place: Library 📚",
+                "Quiet place to clear your head during stressful exam weeks."
+            ),
+            Triple(
+                LatLng(52.24536423679305, -7.139492894570469),
+                "Sad place: Empty Carpark Corner 🅿️",
+                "Lonely, grey environment fitting a sad mood"
+            )
         )
 
-        // Browns Road Park
-        map.addMarker(
-            MarkerOptions()
-                .position(LatLng(52.248879, -7.144149))
-                .title("Browns Road Park 🌳")
-                .snippet("Bigger park near SETU.")
+        // -------------------------------
+        // 5. ANGRY LOCATIONS 😠
+        // -------------------------------
+        val angryMarkers = listOf(
+            Triple(
+                LatLng(52.24581511854891, -7.137333464540997),
+                "Angry outlet: Exam Hall \uD83D\uDE20",
+                "Exam stress levels: 100/100. The place where anger and panic meet"
+            ),
+            Triple(
+                LatLng(52.24553667441552, -7.140606011268003),
+                "Angry outlet: Sports Hall ⚽",
+                "Active environment where frustration can be turned into movement"
+            )
         )
 
-        // Harty's Takeaway
-        map.addMarker(
-            MarkerOptions()
-                .position(LatLng(52.247666, -7.138710))
-                .title("Harty’s Takeaway 🍔")
-                .snippet("Popular student food spot.")
-        )
+        // ---------------------------------
+        // Add ALL mood-grouped markers
+        // ---------------------------------
 
-        // Kingfisher Gym
-        map.addMarker(
-            MarkerOptions()
-                .position(LatLng(52.247092, -7.143010))
-                .title("Kingfisher Gym 🏋️‍♂️")
-                .snippet("Great place to work out and destress.")
+        fun addMarkerList(list: List<Triple<LatLng, String, String>>) {
+            list.forEach { (pos, title, desc) ->
+                map.addMarker(
+                    MarkerOptions()
+                        .position(pos)
+                        .title(title)
+                        .snippet(desc)
+                )
+            }
+        }
+
+        addMarkerList(happyMarkers)
+        addMarkerList(relaxedMarkers)
+        addMarkerList(neutralMarkers)
+        addMarkerList(sadMarkers)
+        addMarkerList(angryMarkers)
+
+        // Center map over SETU Arena Café
+        map.moveCamera(
+            CameraUpdateFactory.newLatLngZoom(
+                LatLng(52.24645, -7.13890),
+                16f
+            )
         )
     }
-
-
 }
