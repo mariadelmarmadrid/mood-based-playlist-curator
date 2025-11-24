@@ -120,10 +120,13 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnOpenPlaylist"
-                style="@style/Widget.Material3.Button.TonalButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/button_open_playlist" />
+                android:text="@string/button_open_playlist"
+                app:icon="@drawable/ic_spotify"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp" />
+
 
             <!-- ===== Legend (icons + counts + labels) =====
                  Flexbox wraps legend items across lines and centers them
