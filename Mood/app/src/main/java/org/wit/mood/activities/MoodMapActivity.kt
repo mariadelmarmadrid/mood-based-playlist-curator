@@ -30,6 +30,7 @@ class MoodMapActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
 
+        map.uiSettings.isZoomControlsEnabled = true
         // -------------------------------
         // 1. HAPPY LOCATIONS 😊
         // -------------------------------
