@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -41,17 +42,22 @@ class MoodActivity : AppCompatActivity() {
     // Image state (optional per note)
     private var selectedPhotoUri: Uri? = null
 
+    // Location attached to this mood (null = none)
+    private var currentLocation: Location? = null
+
+    // Map picker launcher
+    private lateinit var mapIntentLauncher: ActivityResultLauncher<Intent>
+
     // Modern Photo Picker (no storage permissions needed)
     private val pickImage = registerForActivityResult(
         ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         if (uri != null) {
-            // 🔹 Persist read permission so we can still use this URI after app restart
+            // Persist read permission so we can still use this URI after app restart
             val flag = Intent.FLAG_GRANT_READ_URI_PERMISSION
             try {
                 contentResolver.takePersistableUriPermission(uri, flag)
             } catch (e: SecurityException) {
-                // On some devices/flows this might not be allowed; log but don't crash
                 e.printStackTrace()
             }
 
@@ -60,7 +66,6 @@ class MoodActivity : AppCompatActivity() {
         }
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMoodBinding.inflate(layoutInflater)
@@ -68,6 +73,8 @@ class MoodActivity : AppCompatActivity() {
 
         app = application as MainApp
         i("Mood Activity started…")
+
+        registerMapCallback()
 
         // Make the 5 emoji chips behave like a SINGLE-SELECTION group
         wireSingleSelectChips(
@@ -93,14 +100,35 @@ class MoodActivity : AppCompatActivity() {
             }
 
             // Pre-select OPTIONAL detail chips
-            selectChipByText(binding.sleepChipGroup,  m.sleep?.name?.lowercase()?.replaceFirstChar { it.uppercase() })
-            selectChipByText(binding.socialChipGroup, m.social?.name?.lowercase()?.replaceFirstChar { it.uppercase() })
-            selectChipByText(binding.hobbyChipGroup,  m.hobby?.name?.lowercase()?.replaceFirstChar { it.uppercase() })
-            selectChipByText(binding.foodChipGroup,   m.food?.name?.lowercase()?.replace('_',' ')?.replaceFirstChar { it.uppercase() })
+            selectChipByText(
+                binding.sleepChipGroup,
+                m.sleep?.name?.lowercase()?.replaceFirstChar { it.uppercase() }
+            )
+            selectChipByText(
+                binding.socialChipGroup,
+                m.social?.name?.lowercase()?.replaceFirstChar { it.uppercase() }
+            )
+            selectChipByText(
+                binding.hobbyChipGroup,
+                m.hobby?.name?.lowercase()?.replaceFirstChar { it.uppercase() }
+            )
+            selectChipByText(
+                binding.foodChipGroup,
+                m.food?.name
+                    ?.lowercase()
+                    ?.replace('_', ' ')
+                    ?.replaceFirstChar { it.uppercase() }
+            )
 
             // Prefill note and title the button "Update"
             binding.note.setText(m.note)
             binding.btnAdd.text = getString(R.string.update)
+
+            // Prefill location if it exists
+            currentLocation = m.location
+            if (currentLocation != null) {
+                binding.btnSetLocation.text = "Location ✓"
+            }
         }
 
         // Primary actions
@@ -118,7 +146,6 @@ class MoodActivity : AppCompatActivity() {
             binding.btnAddPhoto.text = getString(R.string.button_add_photo) // Reset
         }
 
-
         // If editing and there is an existing photo, show it
         editingMood?.photoUri?.let {
             selectedPhotoUri = Uri.parse(it)
@@ -127,6 +154,19 @@ class MoodActivity : AppCompatActivity() {
             binding.btnAddPhoto.text = getString(R.string.button_add_photo)
         }
 
+        // --- Location button: open MapActivity as a picker ---
+        binding.btnSetLocation.setOnClickListener {
+            // Start from existing location, or default to SETU
+            val startLocation = currentLocation ?: Location(
+                lat = 52.245696,
+                lng = -7.139102,
+                zoom = 15f
+            )
+
+            val launcherIntent = Intent(this, MoodMapActivity::class.java)
+                .putExtra("location", startLocation)
+            mapIntentLauncher.launch(launcherIntent)
+        }
     }
 
     // ---------- Actions ----------
@@ -160,7 +200,8 @@ class MoodActivity : AppCompatActivity() {
                 hobby = hobby,
                 food = food,
                 timestamp = timestamp,
-                photoUri = selectedPhotoUri?.toString()
+                photoUri = selectedPhotoUri?.toString(),
+                location = currentLocation
             )
             app.moods.create(newMood)
             Snackbar.make(binding.root, "Mood added!", Snackbar.LENGTH_SHORT).show()
@@ -174,7 +215,8 @@ class MoodActivity : AppCompatActivity() {
                 hobby = hobby,
                 food = food,
                 timestamp = editingMood!!.timestamp,
-                photoUri = selectedPhotoUri?.toString()
+                photoUri = selectedPhotoUri?.toString(),
+                location = currentLocation
             )
             app.moods.update(updated)
             Snackbar.make(binding.root, "Mood updated!", Snackbar.LENGTH_SHORT).show()
@@ -254,4 +296,18 @@ class MoodActivity : AppCompatActivity() {
         binding.btnRemovePhoto.visibility = View.VISIBLE
     }
 
+    /** Register callback for MapActivity result (location picker). */
+    private fun registerMapCallback() {
+        mapIntentLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == RESULT_OK && result.data != null) {
+                val loc = result.data!!.getParcelableExtra<Location>("location")
+                if (loc != null) {
+                    currentLocation = loc
+                    binding.btnSetLocation.text = "Location ✓"
+                }
+            }
+        }
+    }
 }

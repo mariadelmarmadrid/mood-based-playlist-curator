@@ -551,6 +551,14 @@
                 android:layout_height="wrap_content"
                 android:text="@string/button_add_photo" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSetLocation"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/button_set_location" />
+
             <Space
                 android:layout_width="12dp"
                 android:layout_height="wrap_content" />

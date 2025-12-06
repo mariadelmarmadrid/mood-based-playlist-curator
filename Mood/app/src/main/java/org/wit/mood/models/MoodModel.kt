@@ -17,6 +17,14 @@ import java.time.format.DateTimeFormatter
  * Implements [Parcelable] so it can be passed easily between Activities
  * (e.g., for editing a mood via Intents).
  */
+
+@Parcelize
+data class Location(
+    var lat: Double = 0.0,
+    var lng: Double = 0.0,
+    var zoom: Float = 15f
+) : Parcelable
+
 @Parcelize
 data class MoodModel(
     var id: Long = 0L,
@@ -28,6 +36,7 @@ data class MoodModel(
     var food: FoodType? = null,
     var timestamp: String = LocalDateTime.now()
         .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
-    var photoUri: String? = null
+    var photoUri: String? = null,
+    var location: Location? = null
 ) : Parcelable
 
