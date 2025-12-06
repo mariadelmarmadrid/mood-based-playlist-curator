@@ -20,31 +20,49 @@ class MoodLocationPickerActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var map: GoogleMap
     private var marker: Marker? = null
 
+    // If editing, we may receive an existing location
+    private var initialLocation: Location? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mood_location_picker)
+
+        // Read existing location (if any) passed from MoodActivity
+        initialLocation = intent.getParcelableExtra("location")
 
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        // Handle system back button to return selected location
+        // Handle system back button to return selected (or original) location
         onBackPressedDispatcher.addCallback(
             this,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    marker?.let {
-                        val loc = Location(
-                            lat = it.position.latitude,
-                            lng = it.position.longitude,
-                            zoom = map.cameraPosition.zoom
-                        )
+                    // Priority: new marker → original location → nothing
+                    val locToReturn: Location? = when {
+                        marker != null -> {
+                            Location(
+                                lat = marker!!.position.latitude,
+                                lng = marker!!.position.longitude,
+                                zoom = map.cameraPosition.zoom
+                            )
+                        }
+                        initialLocation != null -> {
+                            initialLocation
+                        }
+                        else -> null
+                    }
 
+                    if (locToReturn != null) {
                         setResult(
                             Activity.RESULT_OK,
-                            Intent().putExtra("location", loc)
+                            Intent().putExtra("location", locToReturn)
                         )
+                    } else {
+                        setResult(Activity.RESULT_CANCELED)
                     }
+
                     finish()
                 }
             }
@@ -54,9 +72,30 @@ class MoodLocationPickerActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
 
-        val default = LatLng(52.2460, -7.1390) // SETU default
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(default, 15f))
+        // Enable + / − zoom buttons
+        map.uiSettings.isZoomControlsEnabled = true
 
+        // Center either on existing location or default to SETU
+        val startLoc = initialLocation
+        val center = if (startLoc != null) {
+            LatLng(startLoc.lat, startLoc.lng)
+        } else {
+            LatLng(52.2460, -7.1390) // Default: SETU area
+        }
+        val zoom = startLoc?.zoom ?: 15f
+
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(center, zoom))
+
+        // If we had a previous location, show its marker
+        if (startLoc != null) {
+            marker = map.addMarker(
+                MarkerOptions()
+                    .position(LatLng(startLoc.lat, startLoc.lng))
+                    .title("Saved location")
+            )
+        }
+
+        // Let user pick a new point by tapping
         map.setOnMapClickListener { pos ->
             marker?.remove()
             marker = map.addMarker(
