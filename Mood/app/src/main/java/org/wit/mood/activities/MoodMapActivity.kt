@@ -16,11 +16,12 @@ import org.wit.mood.models.MoodModel
 class MoodMapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var binding: ActivityMoodMapBinding
-    private lateinit var map: GoogleMap
     private lateinit var app: MainApp
+    private lateinit var map: GoogleMap
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = ActivityMoodMapBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -35,21 +36,30 @@ class MoodMapActivity : AppCompatActivity(), OnMapReadyCallback {
         map = googleMap
         map.uiSettings.isZoomControlsEnabled = true
 
-        val moodsWithLocation = app.moods.findAll().filter { it.location != null }
+        val moodsWithLocation: List<MoodModel> =
+            app.moods.findAll().filter { it.location != null }
 
-        var firstPosition: LatLng? = null
+        if (moodsWithLocation.isEmpty()) {
+            val setu = LatLng(52.2460, -7.1390)
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(setu, 15f))
+            return
+        }
 
-        for (mood in moodsWithLocation) {
-            val loc = mood.location!!
+        moodsWithLocation.forEach { mood ->
+            val loc = mood.location ?: return@forEach
             val pos = LatLng(loc.lat, loc.lng)
-            if (firstPosition == null) firstPosition = pos
 
-            val title = "${mood.type.label} mood"   // e.g. "Happy 😊 mood"
-            val snippet = buildString {
-                if (mood.note.isNotBlank()) {
-                    append("Note: ${mood.note}\n")
-                }
-                append("Date: ${mood.timestamp}")
+            // "yyyy-MM-dd HH:mm:ss" -> "yyyy-MM-dd"
+            val shortDate = mood.timestamp.take(10)
+
+            // Title now includes mood AND date
+            val title = "${mood.type.label} • $shortDate"
+
+            // Snippet just for the note (or fallback text)
+            val snippet = if (mood.note.isNotBlank()) {
+                "Note: ${mood.note}"
+            } else {
+                "No note"
             }
 
             map.addMarker(
@@ -60,9 +70,14 @@ class MoodMapActivity : AppCompatActivity(), OnMapReadyCallback {
             )
         }
 
-        // Center camera
-        val center = firstPosition ?: LatLng(52.2460, -7.1390)  // fallback = SETU
-        val zoom = moodsWithLocation.firstOrNull()?.location?.zoom ?: 15f
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(center, zoom))
+        val latest = moodsWithLocation.maxByOrNull { it.timestamp }
+        latest?.location?.let { loc ->
+            map.moveCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    LatLng(loc.lat, loc.lng),
+                    loc.zoom
+                )
+            )
+        }
     }
 }
