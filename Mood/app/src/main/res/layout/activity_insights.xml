@@ -29,7 +29,7 @@
         android:paddingTop="24dp"
         android:paddingEnd="24dp"
         android:paddingBottom="24dp"
-        app:cardBackgroundColor="@color/white"
+        app:cardBackgroundColor="@color/colorSurface"
         app:cardCornerRadius="24dp"
         app:cardElevation="10dp"
         app:cardUseCompatPadding="true">
@@ -71,7 +71,7 @@
                     android:id="@+id/tvDate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/black"
+                    android:textColor="@color/colorTextPrimary"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -114,7 +114,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:textColor="@color/black"
+                android:textColor="@color/colorTextPrimary"
                 android:textSize="16sp"
                 android:textStyle="italic" />
 
@@ -166,9 +166,9 @@
         android:layout_height="56dp"
         android:layout_gravity="center_horizontal|bottom"
         android:layout_marginBottom="40dp"
-        app:backgroundTint="@android:color/black"
+        app:backgroundTint="@color/colorTextPrimary"
         app:srcCompat="@drawable/ic_add_24"
-        app:tint="@android:color/white"
+        app:tint="@color/colorSurface"
         app:useCompatPadding="true"
         android:contentDescription="@string/button_addMood" />
 

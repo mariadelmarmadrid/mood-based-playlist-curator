@@ -29,7 +29,7 @@
             app:menu="@menu/menu_top"
             app:navigationIcon="@null"
             app:titleCentered="false"
-            app:titleTextColor="@android:color/black" />
+            app:titleTextColor="@color/colorTextPrimary" />
 
         <!-- Thin divider to suggest a static bar (no scroll) -->
         <View
@@ -200,8 +200,8 @@
         android:layout_gravity="center_horizontal|bottom"
         android:layout_marginBottom="40dp"
         app:srcCompat="@drawable/ic_add_24"
-        app:tint="@android:color/white"
-        app:backgroundTint="@android:color/black"
+        app:tint="@color/colorSurface"
+        app:backgroundTint="@color/colorTextPrimary"
         app:useCompatPadding="true"
         android:contentDescription="@string/button_addMood"/>
 

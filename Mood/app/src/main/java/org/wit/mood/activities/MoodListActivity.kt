@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.doOnLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import org.wit.mood.R
@@ -181,13 +182,21 @@ class MoodListActivity : AppCompatActivity() {
                 toggleFilterPanel()
                 true
             }
+
             R.id.action_map -> {
                 startActivity(Intent(this, MoodMapActivity::class.java))
                 true
             }
+
+            R.id.action_toggle_theme -> {
+                toggleTheme()
+                true
+            }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
+
 
 
 
@@ -371,5 +380,20 @@ class MoodListActivity : AppCompatActivity() {
         else -> null
     }
 
+    private fun toggleTheme() {
+        val mode = resources.configuration.uiMode and
+                android.content.res.Configuration.UI_MODE_NIGHT_MASK
+
+        when (mode) {
+            android.content.res.Configuration.UI_MODE_NIGHT_YES ->
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+
+            android.content.res.Configuration.UI_MODE_NIGHT_NO ->
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+
+            else ->
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        }
+    }
 
 }

@@ -14,7 +14,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    android:background="@color/white"
+    android:background="@color/colorSurface"
     android:elevation="8dp">
 
     <!-- Root container for the card’s vertical content -->
@@ -33,7 +33,7 @@
             android:id="@+id/dateText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/black"
+            android:textColor="@color/colorTextPrimary"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -70,7 +70,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:textColor="@color/black"
+            android:textColor="@color/colorTextPrimary"
             android:textSize="16sp"
             android:textStyle="italic" />
     </LinearLayout>

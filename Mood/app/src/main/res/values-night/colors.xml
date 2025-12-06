@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Dark Base Theme Colors -->
+    <color name="colorBackground">#121212</color>       <!-- very dark gray -->
+    <color name="colorSurface">#1E1E1E</color>          <!-- card background -->
+    <color name="colorPrimary">#2A2623</color>          <!-- top/bottom bar dark sand -->
+    <color name="colorOnPrimary">#F5F5F5</color>        <!-- icons/text on app bar -->
+
+    <!-- Accent stays the same (brown tone) -->
+    <color name="colorAccent">#5E4335</color>
+    <color name="colorOnAccent">#FFFFFF</color>
+
+    <!-- Text -->
+    <color name="colorTextPrimary">#F1F1F1</color>       <!-- clear white-ish -->
+    <color name="colorTextSecondary">#B9B9B9</color>     <!-- softer gray -->
+
+    <!-- Divider -->
+    <color name="colorDivider">#33FFFFFF</color>
+
+    <!-- Essentials -->
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="gray">#888888</color>
+
+    <!-- Bottom Navigation -->
+    <color name="bottomBarBg">#2A2623</color>
+    <color name="bottomIconDefault">#7A7A7A</color>
+    <color name="bottomIconActive">@color/colorAccent</color>
+    <color name="fabBlack">@color/colorAccent</color>
+
+    <!-- Mood tints (unchanged — bright colors are good in dark mode) -->
+    <color name="mood_icon_default">#B0B0B0</color>
+    <color name="mood_happy">#FFCA28</color>
+    <color name="mood_relaxed">#A5D6A7</color>
+    <color name="mood_neutral">#90CAF9</color>
+    <color name="mood_sad">#80CBC4</color>
+    <color name="mood_angry">#FFAB91</color>
+
+</resources>
