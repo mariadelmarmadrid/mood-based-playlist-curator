@@ -33,6 +33,11 @@
             android:name=".activities.MoodMapActivity"
             android:exported="false"
             android:label="@string/title_activity_mood_map" />
+
+        <activity
+            android:name=".activities.MoodLocationPickerActivity"
+            android:exported="false" />
+
         <activity
             android:name=".activities.MoodListActivity"
             android:exported="true">

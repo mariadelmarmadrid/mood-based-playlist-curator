@@ -536,7 +536,7 @@
             android:adjustViewBounds="true"
             android:visibility="gone" />
 
-        <!-- Buttons centered under photo -->
+        <!-- Buttons row: Change photo, Remove photo, Set location -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -544,32 +544,44 @@
             android:gravity="center"
             android:layout_marginTop="8dp">
 
+            <!-- Change Photo -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnAddPhoto"
                 style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="@string/button_add_photo" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnSetLocation"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:text="@string/button_set_location" />
-
             <Space
-                android:layout_width="12dp"
+                android:layout_width="8dp"
                 android:layout_height="wrap_content" />
 
+            <!-- Remove Photo (small text button) -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnRemovePhoto"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/button_remove_photo"
-                android:visibility="gone" />
+                android:visibility="gone"
+                android:minWidth="0dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp" />
+
+            <Space
+                android:layout_width="8dp"
+                android:layout_height="wrap_content" />
+
+            <!-- Set Location -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSetLocation"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/button_set_location" />
+
         </LinearLayout>
 
 

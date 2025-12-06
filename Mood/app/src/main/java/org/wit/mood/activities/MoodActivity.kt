@@ -20,47 +20,28 @@ import timber.log.Timber.i
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-/**
- * Screen to CREATE or EDIT a mood entry.
- *
- * - If launched without extras → create mode.
- * - If launched with "mood_edit" Parcelable extra → edit mode (pre-fills UI, updates on save).
- *
- * Persists data via MainApp.moods (JSON store).
- */
 class MoodActivity : AppCompatActivity() {
 
-    // ViewBinding for this layout (type-safe access to views)
     private lateinit var binding: ActivityMoodBinding
-
-    // Application-level reference exposing the MoodStore
     private lateinit var app: MainApp
 
-    // Holds the mood being edited; null = create mode
     private var editingMood: MoodModel? = null
-
-    // Image state (optional per note)
     private var selectedPhotoUri: Uri? = null
 
-    // Location attached to this mood (null = none)
+    // Your own Location data class (org.wit.mood.models.Location)
     private var currentLocation: Location? = null
 
-    // Map picker launcher
     private lateinit var mapIntentLauncher: ActivityResultLauncher<Intent>
 
-    // Modern Photo Picker (no storage permissions needed)
+    // Modern Photo Picker
     private val pickImage = registerForActivityResult(
         ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         if (uri != null) {
-            // Persist read permission so we can still use this URI after app restart
             val flag = Intent.FLAG_GRANT_READ_URI_PERMISSION
             try {
                 contentResolver.takePersistableUriPermission(uri, flag)
-            } catch (e: SecurityException) {
-                e.printStackTrace()
-            }
-
+            } catch (_: SecurityException) { }
             selectedPhotoUri = uri
             showPhoto(uri)
         }
@@ -74,9 +55,10 @@ class MoodActivity : AppCompatActivity() {
         app = application as MainApp
         i("Mood Activity started…")
 
+        // Register callback for map result
         registerMapCallback()
 
-        // Make the 5 emoji chips behave like a SINGLE-SELECTION group
+        // --- Mood emoji chips behave like single-select ---
         wireSingleSelectChips(
             binding.chipHappy,
             binding.chipRelaxed,
@@ -84,13 +66,12 @@ class MoodActivity : AppCompatActivity() {
             binding.chipSad,
             binding.chipAngry
         )
-
-        // Default selection for brand-new entries
         binding.chipNeutral.isChecked = true
 
-        // --- EDIT MODE: pre-fill the form and swap button label to "Update" ---
+        // --- EDIT MODE: if mood_edit extra exists, prefill form ---
         editingMood = intent.getParcelableExtra("mood_edit")
         editingMood?.let { m ->
+            // Main mood
             when (m.type) {
                 MoodType.HAPPY   -> binding.chipHappy.isChecked = true
                 MoodType.RELAXED -> binding.chipRelaxed.isChecked = true
@@ -99,7 +80,7 @@ class MoodActivity : AppCompatActivity() {
                 MoodType.ANGRY   -> binding.chipAngry.isChecked = true
             }
 
-            // Pre-select OPTIONAL detail chips
+            // Optional detail chips
             selectChipByText(
                 binding.sleepChipGroup,
                 m.sleep?.name?.lowercase()?.replaceFirstChar { it.uppercase() }
@@ -120,61 +101,62 @@ class MoodActivity : AppCompatActivity() {
                     ?.replaceFirstChar { it.uppercase() }
             )
 
-            // Prefill note and title the button "Update"
+            // Note + button label
             binding.note.setText(m.note)
             binding.btnAdd.text = getString(R.string.update)
 
-            // Prefill location if it exists
+            // Existing photo
+            m.photoUri?.let {
+                selectedPhotoUri = Uri.parse(it)
+                showPhoto(selectedPhotoUri!!)
+            } ?: run {
+                binding.btnAddPhoto.text = getString(R.string.button_add_photo)
+            }
+
+            // Existing location
             currentLocation = m.location
             if (currentLocation != null) {
                 binding.btnSetLocation.text = "Location ✓"
             }
+        } ?: run {
+            // Create mode – set default button text
+            binding.btnAddPhoto.text = getString(R.string.button_add_photo)
         }
 
-        // Primary actions
+        // --- Buttons ---
+
+        // Save / update mood
         binding.btnAdd.setOnClickListener { onSaveClicked() }
+
+        // Cancel
         binding.btnCancel.setOnClickListener { finish() }
 
-        // Photo actions
+        // Add / change photo
         binding.btnAddPhoto.setOnClickListener {
-            pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            pickImage.launch(
+                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+            )
         }
+
+        // Remove photo
         binding.btnRemovePhoto.setOnClickListener {
             selectedPhotoUri = null
             binding.photoPreview.visibility = View.GONE
             binding.btnRemovePhoto.visibility = View.GONE
-            binding.btnAddPhoto.text = getString(R.string.button_add_photo) // Reset
-        }
-
-        // If editing and there is an existing photo, show it
-        editingMood?.photoUri?.let {
-            selectedPhotoUri = Uri.parse(it)
-            showPhoto(selectedPhotoUri!!)
-        } ?: run {
             binding.btnAddPhoto.text = getString(R.string.button_add_photo)
         }
 
-        // --- Location button: open MapActivity as a picker ---
+        // Location picker button
         binding.btnSetLocation.setOnClickListener {
-            // Start from existing location, or default to SETU
-            val startLocation = currentLocation ?: Location(
-                lat = 52.245696,
-                lng = -7.139102,
-                zoom = 15f
-            )
-
-            val launcherIntent = Intent(this, MoodMapActivity::class.java)
-                .putExtra("location", startLocation)
-            mapIntentLauncher.launch(launcherIntent)
+            val intent = Intent(this, MoodLocationPickerActivity::class.java).apply {
+                currentLocation?.let { putExtra("location", it) }
+            }
+            mapIntentLauncher.launch(intent)
         }
     }
 
-    // ---------- Actions ----------
+    // ----------------- SAVE / UPDATE -----------------
 
-    /**
-     * Validate inputs, then either CREATE a new mood or UPDATE the existing one.
-     * Shows a brief Snackbar for feedback and finishes the Activity with RESULT_OK.
-     */
     private fun onSaveClicked() {
         val selectedType = selectedMoodTypeOrNull()
         if (selectedType == null) {
@@ -182,10 +164,10 @@ class MoodActivity : AppCompatActivity() {
             return
         }
 
-        val sleep  = sleepFromChip(  selectedChipText(binding.sleepChipGroup))
-        val social = socialFromChip( selectedChipText(binding.socialChipGroup))
-        val hobby  = hobbyFromChip(  selectedChipText(binding.hobbyChipGroup))
-        val food   = foodFromChip(   selectedChipText(binding.foodChipGroup))
+        val sleep  = sleepFromChip(selectedChipText(binding.sleepChipGroup))
+        val social = socialFromChip(selectedChipText(binding.socialChipGroup))
+        val hobby  = hobbyFromChip(selectedChipText(binding.hobbyChipGroup))
+        val food   = foodFromChip(selectedChipText(binding.foodChipGroup))
 
         if (editingMood == null) {
             // CREATE
@@ -206,7 +188,7 @@ class MoodActivity : AppCompatActivity() {
             app.moods.create(newMood)
             Snackbar.make(binding.root, "Mood added!", Snackbar.LENGTH_SHORT).show()
         } else {
-            // UPDATE (keep original id + timestamp)
+            // UPDATE – keep same id + timestamp
             val updated = editingMood!!.copy(
                 type = selectedType,
                 note = binding.note.text?.toString().orEmpty(),
@@ -226,9 +208,8 @@ class MoodActivity : AppCompatActivity() {
         finish()
     }
 
-    // ---------- Helpers ----------
+    // ----------------- HELPERS -----------------
 
-    /** Makes a set of Chips act like a single-choice group. */
     private fun wireSingleSelectChips(vararg chips: Chip) {
         chips.forEach { chip ->
             chip.setOnCheckedChangeListener { button, isChecked ->
@@ -239,7 +220,6 @@ class MoodActivity : AppCompatActivity() {
         }
     }
 
-    /** Returns the main MoodType based on which emoji chip is checked. */
     private fun selectedMoodTypeOrNull(): MoodType? {
         val checkedChip = listOf(
             binding.chipHappy,
@@ -253,7 +233,6 @@ class MoodActivity : AppCompatActivity() {
         return MoodType.values().firstOrNull { it.label == labelFromTag }
     }
 
-    /** Selected chip text in a group (or null). */
     private fun selectedChipText(group: ChipGroup): String? {
         val id = group.checkedChipId
         if (id == -1) return null
@@ -261,7 +240,6 @@ class MoodActivity : AppCompatActivity() {
         return chip?.text?.toString()
     }
 
-    // Map label text → enum value (null if no selection).
     private fun sleepFromChip(text: String?): SleepQuality? =
         text?.let { SleepQuality.valueOf(it.uppercase()) }
 
@@ -274,7 +252,6 @@ class MoodActivity : AppCompatActivity() {
     private fun foodFromChip(text: String?): FoodType? =
         text?.let { FoodType.valueOf(it.replace(" ", "_").uppercase()) }
 
-    /** Pre-select a Chip in a group by its displayed text (case sensitive). */
     private fun selectChipByText(group: ChipGroup, text: String?) {
         if (text.isNullOrEmpty()) return
         for (i in 0 until group.childCount) {
@@ -286,17 +263,13 @@ class MoodActivity : AppCompatActivity() {
         }
     }
 
-    /** Show the picked photo in the preview area. */
     private fun showPhoto(uri: Uri) {
         binding.photoPreview.load(uri)
         binding.photoPreview.visibility = View.VISIBLE
-
-        // When a photo exists:
         binding.btnAddPhoto.text = getString(R.string.button_change_photo)
         binding.btnRemovePhoto.visibility = View.VISIBLE
     }
 
-    /** Register callback for MapActivity result (location picker). */
     private fun registerMapCallback() {
         mapIntentLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
