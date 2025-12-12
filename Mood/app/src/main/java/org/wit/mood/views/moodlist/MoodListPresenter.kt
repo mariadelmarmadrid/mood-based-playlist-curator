@@ -5,9 +5,7 @@ import org.wit.mood.main.MainApp
 import org.wit.mood.models.DailyMoodSummary
 import org.wit.mood.models.MoodModel
 import org.wit.mood.activities.MoodMapActivity
-import org.wit.mood.activities.MoodView
 import org.wit.mood.activities.InsightsActivity
-import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class MoodListPresenter(private val view: MoodListView) {

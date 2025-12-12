@@ -18,6 +18,8 @@ import org.wit.mood.models.MoodType
 import android.content.ActivityNotFoundException
 import android.net.Uri
 import com.google.android.material.snackbar.Snackbar
+import org.wit.mood.views.mood.MoodView
+import org.wit.mood.views.moodlist.MoodListView
 
 
 /**
@@ -57,7 +59,7 @@ class InsightsActivity : AppCompatActivity() {
         binding.bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
-                    startActivity(Intent(this, MoodListActivity::class.java))
+                    startActivity(Intent(this, MoodListView::class.java))
                     overridePendingTransition(0, 0)
                     finish()   // remove Insights from back stack
                     true
@@ -72,7 +74,7 @@ class InsightsActivity : AppCompatActivity() {
 
         // --- FAB → add a new mood (comes back via getResult) ---
         binding.fabAdd.setOnClickListener {
-            getResult.launch(Intent(this, MoodActivity::class.java))
+            getResult.launch(Intent(this, MoodView::class.java))
         }
 
         // --- Day navigation (chevrons) ---

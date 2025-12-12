@@ -7,7 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import org.wit.mood.main.MainApp
 import org.wit.mood.models.*
-import org.wit.mood.activities.MoodLocationPickerActivity
+import org.wit.mood.views.location.LocationPickerView
 import timber.log.Timber
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -70,7 +70,7 @@ class MoodPresenter(private val view: MoodView) {
 
     fun doSetLocation() {
         val start = mood.location ?: Location(52.245696, -7.139102, 15f)
-        val launcherIntent = Intent(view, MoodLocationPickerActivity::class.java)
+        val launcherIntent = Intent(view, LocationPickerView::class.java)
             .putExtra("location", start)
         mapIntentLauncher.launch(launcherIntent)
     }
