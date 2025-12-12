@@ -21,7 +21,19 @@ class MoodView : AppCompatActivity() {
         binding = ActivityMoodBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        wireSingleSelectChips(
+            binding.chipHappy,
+            binding.chipRelaxed,
+            binding.chipNeutral,
+            binding.chipSad,
+            binding.chipAngry
+        )
+
         presenter = MoodPresenter(this)
+
+        if (!presenter.edit) {
+            binding.chipNeutral.isChecked = true
+        }
 
         // Save/Add
         binding.btnAdd.setOnClickListener {
@@ -143,4 +155,16 @@ class MoodView : AppCompatActivity() {
 
     private fun foodFromChip(text: String?): FoodType? =
         text?.let { FoodType.valueOf(it.replace(" ", "_").uppercase()) }
+
+    private fun wireSingleSelectChips(vararg chips: com.google.android.material.chip.Chip) {
+        chips.forEach { chip ->
+            chip.setOnCheckedChangeListener { button, isChecked ->
+                if (isChecked) {
+                    chips.filter { it.id != button.id }
+                        .forEach { it.isChecked = false }
+                }
+            }
+        }
+    }
+
 }
