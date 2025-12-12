@@ -2,13 +2,15 @@ package org.wit.mood.views.mood
 
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import coil.load
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import com.google.android.material.snackbar.Snackbar
 import org.wit.mood.R
 import org.wit.mood.databinding.ActivityMoodBinding
 import org.wit.mood.models.*
-import timber.log.Timber.i
 
 class MoodView : AppCompatActivity() {
 
@@ -21,6 +23,7 @@ class MoodView : AppCompatActivity() {
         binding = ActivityMoodBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Make the 5 emoji chips behave like SINGLE-SELECTION
         wireSingleSelectChips(
             binding.chipHappy,
             binding.chipRelaxed,
@@ -29,11 +32,10 @@ class MoodView : AppCompatActivity() {
             binding.chipAngry
         )
 
-        presenter = MoodPresenter(this)
+        // Default mood for CREATE mode (Presenter may override in EDIT mode via showMood())
+        binding.chipNeutral.isChecked = true
 
-        if (!presenter.edit) {
-            binding.chipNeutral.isChecked = true
-        }
+        presenter = MoodPresenter(this)
 
         // Save/Add
         binding.btnAdd.setOnClickListener {
@@ -56,30 +58,31 @@ class MoodView : AppCompatActivity() {
         // Cancel
         binding.btnCancel.setOnClickListener { presenter.doCancel() }
 
-        // Photo
+        // Photo (cache current form state first)
         binding.btnAddPhoto.setOnClickListener {
             presenter.cacheMood(
-                selectedMoodTypeOrNull(),
-                binding.note.text.toString(),
-                sleepFromChip(selectedChipText(binding.sleepChipGroup)),
-                socialFromChip(selectedChipText(binding.socialChipGroup)),
-                hobbyFromChip(selectedChipText(binding.hobbyChipGroup)),
-                foodFromChip(selectedChipText(binding.foodChipGroup))
+                type = selectedMoodTypeOrNull(),
+                note = binding.note.text.toString(),
+                sleep = sleepFromChip(selectedChipText(binding.sleepChipGroup)),
+                social = socialFromChip(selectedChipText(binding.socialChipGroup)),
+                hobby = hobbyFromChip(selectedChipText(binding.hobbyChipGroup)),
+                food = foodFromChip(selectedChipText(binding.foodChipGroup))
             )
             presenter.doSelectImage()
         }
 
+        // Remove photo
         binding.btnRemovePhoto.setOnClickListener { presenter.doRemovePhoto() }
 
-        // Location
+        // Location (cache current form state first)
         binding.btnSetLocation.setOnClickListener {
             presenter.cacheMood(
-                selectedMoodTypeOrNull(),
-                binding.note.text.toString(),
-                sleepFromChip(selectedChipText(binding.sleepChipGroup)),
-                socialFromChip(selectedChipText(binding.socialChipGroup)),
-                hobbyFromChip(selectedChipText(binding.hobbyChipGroup)),
-                foodFromChip(selectedChipText(binding.foodChipGroup))
+                type = selectedMoodTypeOrNull(),
+                note = binding.note.text.toString(),
+                sleep = sleepFromChip(selectedChipText(binding.sleepChipGroup)),
+                social = socialFromChip(selectedChipText(binding.socialChipGroup)),
+                hobby = hobbyFromChip(selectedChipText(binding.hobbyChipGroup)),
+                food = foodFromChip(selectedChipText(binding.foodChipGroup))
             )
             presenter.doSetLocation()
         }
@@ -91,7 +94,7 @@ class MoodView : AppCompatActivity() {
         binding.note.setText(mood.note)
         binding.btnAdd.text = getString(R.string.update)
 
-        // main mood chip
+        // Main mood chip
         when (mood.type) {
             MoodType.HAPPY -> binding.chipHappy.isChecked = true
             MoodType.RELAXED -> binding.chipRelaxed.isChecked = true
@@ -100,24 +103,26 @@ class MoodView : AppCompatActivity() {
             MoodType.ANGRY -> binding.chipAngry.isChecked = true
         }
 
-        // photo
-        mood.photoUri?.let { updatePhoto(it) }
+        // Optional detail chips (if you want these preselected, add selection code here)
+        // (Your current version only sets the main mood + note)
 
-        // location tick
+        // Photo
+        mood.photoUri?.let { updatePhoto(it) } ?: hidePhoto()
+
+        // Location tick
         showLocationTick(mood.location != null)
     }
 
     fun updatePhoto(uriString: String) {
-        i("Photo updated")
         binding.photoPreview.load(Uri.parse(uriString))
-        binding.photoPreview.visibility = android.view.View.VISIBLE
-        binding.btnRemovePhoto.visibility = android.view.View.VISIBLE
+        binding.photoPreview.visibility = View.VISIBLE
+        binding.btnRemovePhoto.visibility = View.VISIBLE
         binding.btnAddPhoto.text = getString(R.string.button_change_photo)
     }
 
     fun hidePhoto() {
-        binding.photoPreview.visibility = android.view.View.GONE
-        binding.btnRemovePhoto.visibility = android.view.View.GONE
+        binding.photoPreview.visibility = View.GONE
+        binding.btnRemovePhoto.visibility = View.GONE
         binding.btnAddPhoto.text = getString(R.string.button_add_photo)
     }
 
@@ -126,21 +131,25 @@ class MoodView : AppCompatActivity() {
             if (selected) "Location ✓" else getString(R.string.button_set_location)
     }
 
-    // ---------- helpers to read form ----------
+    // ---------- Helpers to read form ----------
 
     private fun selectedMoodTypeOrNull(): MoodType? {
         val checked = listOf(
-            binding.chipHappy, binding.chipRelaxed, binding.chipNeutral, binding.chipSad, binding.chipAngry
+            binding.chipHappy,
+            binding.chipRelaxed,
+            binding.chipNeutral,
+            binding.chipSad,
+            binding.chipAngry
         ).firstOrNull { it.isChecked } ?: return null
 
         val labelFromTag = (checked.tag as? String).orEmpty()
         return MoodType.values().firstOrNull { it.label == labelFromTag }
     }
 
-    private fun selectedChipText(group: com.google.android.material.chip.ChipGroup): String? {
+    private fun selectedChipText(group: ChipGroup): String? {
         val id = group.checkedChipId
         if (id == -1) return null
-        val chip = group.findViewById<com.google.android.material.chip.Chip>(id)
+        val chip = group.findViewById<Chip>(id)
         return chip?.text?.toString()
     }
 
@@ -156,15 +165,20 @@ class MoodView : AppCompatActivity() {
     private fun foodFromChip(text: String?): FoodType? =
         text?.let { FoodType.valueOf(it.replace(" ", "_").uppercase()) }
 
-    private fun wireSingleSelectChips(vararg chips: com.google.android.material.chip.Chip) {
+    /**
+     * Single-select behaviour + prevents "none selected".
+     * If user tries to uncheck the last selected chip, we re-check it.
+     */
+    private fun wireSingleSelectChips(vararg chips: Chip) {
         chips.forEach { chip ->
             chip.setOnCheckedChangeListener { button, isChecked ->
                 if (isChecked) {
-                    chips.filter { it.id != button.id }
-                        .forEach { it.isChecked = false }
+                    chips.filter { it.id != button.id }.forEach { it.isChecked = false }
+                } else {
+                    // Prevent having none selected
+                    if (chips.none { it.isChecked }) button.isChecked = true
                 }
             }
         }
     }
-
 }
