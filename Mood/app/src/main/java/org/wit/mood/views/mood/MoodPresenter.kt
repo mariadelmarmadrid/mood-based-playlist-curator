@@ -1,130 +1,136 @@
-package org.wit.mood.activities
+package org.wit.mood.views.mood
 
-import android.net.Uri
+import android.content.Intent
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import org.wit.mood.main.MainApp
 import org.wit.mood.models.*
+import org.wit.mood.activities.MoodLocationPickerActivity
+import timber.log.Timber
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-class MoodPresenter(
-    private val view: MoodView,
-    private val app: MainApp
-) {
+class MoodPresenter(private val view: MoodView) {
 
-    fun init(editingMood: MoodModel?) {
-        // Edit mode: prefill UI
-        if (editingMood != null) {
-            view.setUpdateMode(true)
-            view.setMoodSelected(editingMood.type)
-            view.setNote(editingMood.note)
+    var mood = MoodModel()
+    var app: MainApp = view.application as MainApp
 
-            // Photo
-            editingMood.photoUri?.let {
-                val uri = Uri.parse(it)
-                view.setSelectedPhotoUri(uri)
-                view.showPhoto(uri)
-            } ?: view.hidePhoto()
+    private lateinit var imageIntentLauncher: ActivityResultLauncher<PickVisualMediaRequest>
+    private lateinit var mapIntentLauncher: ActivityResultLauncher<Intent>
 
-            // Location
-            view.setCurrentLocation(editingMood.location)
-            view.setLocationButtonChecked(editingMood.location != null)
-        } else {
-            // Create mode defaults
-            view.setUpdateMode(false)
-            view.hidePhoto()
-            view.setLocationButtonChecked(false)
+    var edit = false
+
+    init {
+        if (view.intent.hasExtra("mood_edit")) {
+            edit = true
+            mood = view.intent.extras?.getParcelable("mood_edit")!!
+            view.showMood(mood)
         }
+
+        registerImagePickerCallback()
+        registerMapCallback()
     }
 
-    fun onAddPhotoClicked(launchPicker: () -> Unit) {
-        launchPicker()
+    fun doAddOrSave(
+        type: MoodType,
+        note: String,
+        sleep: SleepQuality?,
+        social: SocialActivity?,
+        hobby: Hobby?,
+        food: FoodType?
+    ) {
+        mood.type = type
+        mood.note = note
+        mood.sleep = sleep
+        mood.social = social
+        mood.hobby = hobby
+        mood.food = food
+
+        if (!edit) {
+            mood.timestamp = LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+        }
+
+        if (edit) app.moods.update(mood) else app.moods.create(mood)
+
+        view.setResult(AppCompatActivity.RESULT_OK)
+        view.finish()
     }
 
-    fun onPhotoPicked(uri: Uri) {
-        view.setSelectedPhotoUri(uri)
-        view.showPhoto(uri)
+    fun doCancel() = view.finish()
+
+    fun doSelectImage() {
+        val request = PickVisualMediaRequest.Builder()
+            .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly)
+            .build()
+        imageIntentLauncher.launch(request)
     }
 
-    fun onRemovePhotoClicked() {
-        view.setSelectedPhotoUri(null)
+    fun doSetLocation() {
+        val start = mood.location ?: Location(52.245696, -7.139102, 15f)
+        val launcherIntent = Intent(view, MoodLocationPickerActivity::class.java)
+            .putExtra("location", start)
+        mapIntentLauncher.launch(launcherIntent)
+    }
+
+    fun cacheMood(
+        type: MoodType?,
+        note: String,
+        sleep: SleepQuality?,
+        social: SocialActivity?,
+        hobby: Hobby?,
+        food: FoodType?
+    ) {
+        if (type != null) mood.type = type
+        mood.note = note
+        mood.sleep = sleep
+        mood.social = social
+        mood.hobby = hobby
+        mood.food = food
+    }
+
+    fun doRemovePhoto() {
+        mood.photoUri = null
         view.hidePhoto()
     }
 
-    fun onLocationPicked(location: Location) {
-        view.setCurrentLocation(location)
-        view.setLocationButtonChecked(true)
-    }
+    // ---------------- callbacks ----------------
 
-    fun onSaveClicked() {
-        val selectedType = view.getSelectedMoodTypeOrNull()
-        if (selectedType == null) {
-            view.showMessage("Please select a mood!")
-            return
+    private fun registerImagePickerCallback() {
+        imageIntentLauncher = view.registerForActivityResult(
+            ActivityResultContracts.PickVisualMedia()
+        ) { uri ->
+            try {
+                if (uri != null) {
+                    view.contentResolver.takePersistableUriPermission(
+                        uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
+                    mood.photoUri = uri.toString()
+                    Timber.i("IMG :: ${mood.photoUri}")
+                    view.updatePhoto(mood.photoUri!!)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
-
-        val sleep  = sleepFromChip(view.getSelectedSleepText())
-        val social = socialFromChip(view.getSelectedSocialText())
-        val hobby  = hobbyFromChip(view.getSelectedHobbyText())
-        val food   = foodFromChip(view.getSelectedFoodText())
-
-        val note = view.getNoteText()
-        val photoUri = view.getSelectedPhotoUriOrNull()?.toString()
-        val location = view.getCurrentLocationOrNull()
-
-        val editingMood = view.getEditingMoodOrNull()
-
-        if (editingMood == null) {
-            val timestamp = LocalDateTime.now()
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-
-            val newMood = MoodModel(
-                type = selectedType,
-                note = note,
-                sleep = sleep,
-                social = social,
-                hobby = hobby,
-                food = food,
-                timestamp = timestamp,
-                photoUri = photoUri,
-                location = location
-            )
-            app.moods.create(newMood)
-            view.showMessage("Mood added!")
-        } else {
-            val updated = editingMood.copy(
-                type = selectedType,
-                note = note,
-                sleep = sleep,
-                social = social,
-                hobby = hobby,
-                food = food,
-                timestamp = editingMood.timestamp,
-                photoUri = photoUri,
-                location = location
-            )
-            app.moods.update(updated)
-            view.showMessage("Mood updated!")
-        }
-
-        view.closeWithOkResult()
     }
 
-    fun onCancelClicked() {
-        // Just close (no RESULT_OK)
-        // Your Activity can simply finish(), but keeping it here is clean MVP.
-        // If you want: view.closeWithoutResult()
+    private fun registerMapCallback() {
+        mapIntentLauncher =
+            view.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                when (result.resultCode) {
+                    AppCompatActivity.RESULT_OK -> {
+                        val loc = result.data?.extras?.getParcelable<Location>("location")
+                        if (loc != null) {
+                            Timber.i("Location == $loc")
+                            mood.location = loc
+                            view.showLocationTick(true)
+                        }
+                    }
+                    else -> {}
+                }
+            }
     }
-
-    // ------- mapping helpers -------
-    private fun sleepFromChip(text: String?): SleepQuality? =
-        text?.let { SleepQuality.valueOf(it.uppercase()) }
-
-    private fun socialFromChip(text: String?): SocialActivity? =
-        text?.let { SocialActivity.valueOf(it.uppercase()) }
-
-    private fun hobbyFromChip(text: String?): Hobby? =
-        text?.let { Hobby.valueOf(it.uppercase()) }
-
-    private fun foodFromChip(text: String?): FoodType? =
-        text?.let { FoodType.valueOf(it.replace(" ", "_").uppercase()) }
 }

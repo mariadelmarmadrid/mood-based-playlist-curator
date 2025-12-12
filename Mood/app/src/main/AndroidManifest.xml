@@ -51,7 +51,7 @@
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
-        <activity android:name=".activities.MoodActivity">
+        <activity android:name=".views.mood.MoodView">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
