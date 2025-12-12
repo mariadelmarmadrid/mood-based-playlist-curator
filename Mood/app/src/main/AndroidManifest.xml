@@ -39,7 +39,7 @@
             android:exported="false" />
 
         <activity
-            android:name=".activities.MoodListActivity"
+            android:name=".views.moodlist.MoodListView"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
