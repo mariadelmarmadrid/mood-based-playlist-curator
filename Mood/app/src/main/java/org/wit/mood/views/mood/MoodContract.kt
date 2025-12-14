@@ -5,6 +5,7 @@ import org.wit.mood.models.*
 interface MoodContract {
 
     interface View {
+        fun launchShareIntent(text: String)
         fun showMood(mood: MoodModel)
         fun updatePhoto(uriString: String)
         fun hidePhoto()
@@ -22,7 +23,7 @@ interface MoodContract {
             hobby: Hobby?,
             food: FoodType?
         )
-
+        fun doShare()
         fun doCancel()
         fun doSelectImage()
         fun doSetLocation()

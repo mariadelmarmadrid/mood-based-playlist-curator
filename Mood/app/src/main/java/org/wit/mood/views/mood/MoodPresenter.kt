@@ -76,6 +76,11 @@ class MoodPresenter(private val view: MoodView) : MoodContract.Presenter {
         mapIntentLauncher.launch(launcherIntent)
     }
 
+    override fun doRemovePhoto() {
+        mood.photoUri = null
+        view.hidePhoto()
+    }
+
     override fun cacheMood(
         type: MoodType?,
         note: String,
@@ -92,12 +97,20 @@ class MoodPresenter(private val view: MoodView) : MoodContract.Presenter {
         mood.food = food
     }
 
-    override fun doRemovePhoto() {
-        mood.photoUri = null
-        view.hidePhoto()
-    }
+    override fun doShare() {
+        // If it's a brand-new mood and not saved yet, timestamp might be empty
+        val date = mood.timestamp.takeIf { it.length >= 10 }?.take(10) ?: "N/A"
+        val note = mood.note.ifBlank { "No note" }
+        val loc = mood.location?.let { "Location: ${it.lat}, ${it.lng}" } ?: "Location: none"
 
-    // ---------------- callbacks ----------------
+        val text =
+            "${mood.type.label}\n" +
+                    "Date: $date\n" +
+                    "Note: $note\n" +
+                    loc
+
+        view.launchShareIntent(text)
+    }
 
     private fun registerImagePickerCallback() {
         imageIntentLauncher = view.registerForActivityResult(
@@ -123,16 +136,13 @@ class MoodPresenter(private val view: MoodView) : MoodContract.Presenter {
     private fun registerMapCallback() {
         mapIntentLauncher =
             view.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                when (result.resultCode) {
-                    AppCompatActivity.RESULT_OK -> {
-                        val loc = result.data?.extras?.getParcelable<Location>("location")
-                        if (loc != null) {
-                            Timber.i("Location == $loc")
-                            mood.location = loc
-                            view.showLocationTick(true)
-                        }
+                if (result.resultCode == AppCompatActivity.RESULT_OK) {
+                    val loc = result.data?.extras?.getParcelable<Location>("location")
+                    if (loc != null) {
+                        Timber.i("Location == $loc")
+                        mood.location = loc
+                        view.showLocationTick(true)
                     }
-                    else -> { /* ignore */ }
                 }
             }
     }
