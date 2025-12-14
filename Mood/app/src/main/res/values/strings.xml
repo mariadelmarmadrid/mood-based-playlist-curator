@@ -113,5 +113,6 @@
     <string name="button_set_location">Set location</string>
     <string name="button_location_set">Location ✓</string>
 
+    <string name="share">Share</string>
 
 </resources>
