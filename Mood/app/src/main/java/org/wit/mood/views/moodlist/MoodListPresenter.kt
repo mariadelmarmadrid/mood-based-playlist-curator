@@ -4,11 +4,11 @@ import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import org.wit.mood.activities.InsightsActivity
 import org.wit.mood.activities.MoodMapActivity
 import org.wit.mood.main.MainApp
 import org.wit.mood.models.DailyMoodSummary
 import org.wit.mood.models.MoodModel
+import org.wit.mood.views.insights.InsightsView
 import org.wit.mood.views.mood.MoodView
 
 class MoodListPresenter(private val view: MoodListView) {
@@ -48,7 +48,7 @@ class MoodListPresenter(private val view: MoodListView) {
     }
 
     fun openInsights() {
-        view.startActivity(Intent(view, InsightsActivity::class.java))
+        view.startActivity(Intent(view, InsightsView::class.java))
         view.finish()
     }
 
