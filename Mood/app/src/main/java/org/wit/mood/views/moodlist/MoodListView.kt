@@ -1,5 +1,6 @@
 package org.wit.mood.views.moodlist
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -8,8 +9,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import org.wit.mood.R
 import org.wit.mood.adapters.DailyMoodAdapter
 import org.wit.mood.databinding.ActivityMoodListBinding
+import org.wit.mood.models.DailyMoodSummary
+import org.wit.mood.models.MoodModel
+import org.wit.mood.activities.MoodMapActivity
+import org.wit.mood.views.insights.InsightsView
+import org.wit.mood.views.mood.MoodView
 
-class MoodListView : AppCompatActivity() {
+class MoodListView : AppCompatActivity(), MoodListContract.View {
 
     private lateinit var binding: ActivityMoodListBinding
     private lateinit var presenter: MoodListPresenter
@@ -24,7 +30,7 @@ class MoodListView : AppCompatActivity() {
         setSupportActionBar(binding.topAppBar)
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
 
-        // ✅ Bottom navigation wiring (THIS fixes chart icon doing nothing)
+        // Bottom navigation
         binding.bottomNav.selectedItemId = R.id.nav_home
         binding.bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -38,9 +44,9 @@ class MoodListView : AppCompatActivity() {
         }
         binding.bottomNav.setOnItemReselectedListener { }
 
-        binding.fabAdd.setOnClickListener { presenter.openAddMood() }
-
-        renderList()
+        binding.fabAdd.setOnClickListener {
+            presenter.openAddMood()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -58,16 +64,32 @@ class MoodListView : AppCompatActivity() {
         }
     }
 
-    // ✅ Make this public so presenter can refresh
-    fun renderList() {
-        val moods = presenter.loadMoods()
-        val days = presenter.groupByDay(moods)
+    // ---------- Contract methods ----------
 
+    override fun renderList(days: List<DailyMoodSummary>) {
         binding.recyclerView.adapter = DailyMoodAdapter(
             days = days,
             app = application as org.wit.mood.main.MainApp,
             onEditClick = { presenter.openEditMood(it) },
-            onDataChanged = { renderList() }
+            onDataChanged = { presenter.loadMoods() }
         )
+    }
+
+    override fun launchMoodEditor(mood: MoodModel?) {
+        val intent = Intent(this, MoodView::class.java)
+        mood?.let { intent.putExtra("mood_edit", it) }
+        presenter.launchEditor(intent)
+    }
+
+    override fun navigateToMap() {
+        startActivity(Intent(this, MoodMapActivity::class.java))
+    }
+
+    override fun navigateToInsights() {
+        startActivity(Intent(this, InsightsView::class.java))
+    }
+
+    override fun finishView() {
+        finish()
     }
 }
