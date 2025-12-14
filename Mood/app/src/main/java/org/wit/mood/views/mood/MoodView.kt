@@ -12,7 +12,7 @@ import org.wit.mood.R
 import org.wit.mood.databinding.ActivityMoodBinding
 import org.wit.mood.models.*
 
-class MoodView : AppCompatActivity() {
+class MoodView : AppCompatActivity(), MoodContract.View {
 
     private lateinit var binding: ActivityMoodBinding
     private lateinit var presenter: MoodPresenter
@@ -23,7 +23,7 @@ class MoodView : AppCompatActivity() {
         binding = ActivityMoodBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Make the 5 emoji chips behave like SINGLE-SELECTION
+        // Make emoji chips behave like single-select and never allow "none selected"
         wireSingleSelectChips(
             binding.chipHappy,
             binding.chipRelaxed,
@@ -32,16 +32,18 @@ class MoodView : AppCompatActivity() {
             binding.chipAngry
         )
 
-        // Default mood for CREATE mode (Presenter may override in EDIT mode via showMood())
-        binding.chipNeutral.isChecked = true
-
         presenter = MoodPresenter(this)
+
+        // Default mood ONLY for create mode
+        if (!presenter.edit) {
+            binding.chipNeutral.isChecked = true
+        }
 
         // Save/Add
         binding.btnAdd.setOnClickListener {
             val type = selectedMoodTypeOrNull()
             if (type == null) {
-                Snackbar.make(binding.root, "Please select a mood!", Snackbar.LENGTH_SHORT).show()
+                showError("Please select a mood!")
                 return@setOnClickListener
             }
 
@@ -58,7 +60,7 @@ class MoodView : AppCompatActivity() {
         // Cancel
         binding.btnCancel.setOnClickListener { presenter.doCancel() }
 
-        // Photo (cache current form state first)
+        // Photo (cache form state first)
         binding.btnAddPhoto.setOnClickListener {
             presenter.cacheMood(
                 type = selectedMoodTypeOrNull(),
@@ -71,10 +73,9 @@ class MoodView : AppCompatActivity() {
             presenter.doSelectImage()
         }
 
-        // Remove photo
         binding.btnRemovePhoto.setOnClickListener { presenter.doRemovePhoto() }
 
-        // Location (cache current form state first)
+        // Location (cache form state first)
         binding.btnSetLocation.setOnClickListener {
             presenter.cacheMood(
                 type = selectedMoodTypeOrNull(),
@@ -88,50 +89,51 @@ class MoodView : AppCompatActivity() {
         }
     }
 
-    // ---------- Called by presenter ----------
+    // ---------- Contract methods ----------
 
-    fun showMood(mood: MoodModel) {
+    override fun showMood(mood: MoodModel) {
         binding.note.setText(mood.note)
         binding.btnAdd.text = getString(R.string.update)
 
-        // Main mood chip
         when (mood.type) {
-            MoodType.HAPPY -> binding.chipHappy.isChecked = true
+            MoodType.HAPPY   -> binding.chipHappy.isChecked = true
             MoodType.RELAXED -> binding.chipRelaxed.isChecked = true
             MoodType.NEUTRAL -> binding.chipNeutral.isChecked = true
-            MoodType.SAD -> binding.chipSad.isChecked = true
-            MoodType.ANGRY -> binding.chipAngry.isChecked = true
+            MoodType.SAD     -> binding.chipSad.isChecked = true
+            MoodType.ANGRY   -> binding.chipAngry.isChecked = true
         }
 
-        // Optional detail chips (if you want these preselected, add selection code here)
-        // (Your current version only sets the main mood + note)
-
-        // Photo
         mood.photoUri?.let { updatePhoto(it) } ?: hidePhoto()
-
-        // Location tick
         showLocationTick(mood.location != null)
     }
 
-    fun updatePhoto(uriString: String) {
+    override fun updatePhoto(uriString: String) {
         binding.photoPreview.load(Uri.parse(uriString))
         binding.photoPreview.visibility = View.VISIBLE
         binding.btnRemovePhoto.visibility = View.VISIBLE
         binding.btnAddPhoto.text = getString(R.string.button_change_photo)
     }
 
-    fun hidePhoto() {
+    override fun hidePhoto() {
         binding.photoPreview.visibility = View.GONE
         binding.btnRemovePhoto.visibility = View.GONE
         binding.btnAddPhoto.text = getString(R.string.button_add_photo)
     }
 
-    fun showLocationTick(selected: Boolean) {
+    override fun showLocationTick(show: Boolean) {
         binding.btnSetLocation.text =
-            if (selected) "Location ✓" else getString(R.string.button_set_location)
+            if (show) "Location ✓" else getString(R.string.button_set_location)
     }
 
-    // ---------- Helpers to read form ----------
+    override fun showError(message: String) {
+        Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
+    }
+
+    override fun finishView() {
+        finish()
+    }
+
+    // ---------- helpers ----------
 
     private fun selectedMoodTypeOrNull(): MoodType? {
         val checked = listOf(
@@ -166,8 +168,8 @@ class MoodView : AppCompatActivity() {
         text?.let { FoodType.valueOf(it.replace(" ", "_").uppercase()) }
 
     /**
-     * Single-select behaviour + prevents "none selected".
-     * If user tries to uncheck the last selected chip, we re-check it.
+     * Single-select behaviour + prevents "none selected":
+     * if user tries to uncheck the last selected chip, re-check it.
      */
     private fun wireSingleSelectChips(vararg chips: Chip) {
         chips.forEach { chip ->
@@ -175,7 +177,6 @@ class MoodView : AppCompatActivity() {
                 if (isChecked) {
                     chips.filter { it.id != button.id }.forEach { it.isChecked = false }
                 } else {
-                    // Prevent having none selected
                     if (chips.none { it.isChecked }) button.isChecked = true
                 }
             }

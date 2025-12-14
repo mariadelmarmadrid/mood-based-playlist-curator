@@ -12,15 +12,16 @@ import timber.log.Timber
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-class MoodPresenter(private val view: MoodView) {
+class MoodPresenter(private val view: MoodView) : MoodContract.Presenter {
 
     var mood = MoodModel()
-    var app: MainApp = view.application as MainApp
+    private val app: MainApp = view.application as MainApp
 
     private lateinit var imageIntentLauncher: ActivityResultLauncher<PickVisualMediaRequest>
     private lateinit var mapIntentLauncher: ActivityResultLauncher<Intent>
 
-    var edit = false
+    var edit: Boolean = false
+        private set
 
     init {
         if (view.intent.hasExtra("mood_edit")) {
@@ -33,7 +34,7 @@ class MoodPresenter(private val view: MoodView) {
         registerMapCallback()
     }
 
-    fun doAddOrSave(
+    override fun doAddOrSave(
         type: MoodType,
         note: String,
         sleep: SleepQuality?,
@@ -56,26 +57,26 @@ class MoodPresenter(private val view: MoodView) {
         if (edit) app.moods.update(mood) else app.moods.create(mood)
 
         view.setResult(AppCompatActivity.RESULT_OK)
-        view.finish()
+        view.finishView()
     }
 
-    fun doCancel() = view.finish()
+    override fun doCancel() = view.finishView()
 
-    fun doSelectImage() {
+    override fun doSelectImage() {
         val request = PickVisualMediaRequest.Builder()
             .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly)
             .build()
         imageIntentLauncher.launch(request)
     }
 
-    fun doSetLocation() {
+    override fun doSetLocation() {
         val start = mood.location ?: Location(52.245696, -7.139102, 15f)
         val launcherIntent = Intent(view, LocationPickerView::class.java)
             .putExtra("location", start)
         mapIntentLauncher.launch(launcherIntent)
     }
 
-    fun cacheMood(
+    override fun cacheMood(
         type: MoodType?,
         note: String,
         sleep: SleepQuality?,
@@ -91,7 +92,7 @@ class MoodPresenter(private val view: MoodView) {
         mood.food = food
     }
 
-    fun doRemovePhoto() {
+    override fun doRemovePhoto() {
         mood.photoUri = null
         view.hidePhoto()
     }
@@ -105,7 +106,8 @@ class MoodPresenter(private val view: MoodView) {
             try {
                 if (uri != null) {
                     view.contentResolver.takePersistableUriPermission(
-                        uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
                     )
                     mood.photoUri = uri.toString()
                     Timber.i("IMG :: ${mood.photoUri}")
@@ -113,6 +115,7 @@ class MoodPresenter(private val view: MoodView) {
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
+                view.showError("Could not load photo.")
             }
         }
     }
@@ -129,7 +132,7 @@ class MoodPresenter(private val view: MoodView) {
                             view.showLocationTick(true)
                         }
                     }
-                    else -> {}
+                    else -> { /* ignore */ }
                 }
             }
     }
