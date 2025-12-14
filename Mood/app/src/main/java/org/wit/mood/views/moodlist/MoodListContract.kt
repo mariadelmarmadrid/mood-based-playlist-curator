@@ -10,6 +10,7 @@ interface MoodListContract {
         fun launchMoodEditor(mood: MoodModel? = null)
         fun navigateToMap()
         fun navigateToInsights()
+        fun applyNightMode(enabled: Boolean)
         fun finishView()
     }
 
@@ -19,5 +20,8 @@ interface MoodListContract {
         fun openEditMood(mood: MoodModel)
         fun openMap()
         fun openInsights()
+        fun loadNightMode()
+        fun doToggleNightMode()
+        fun launchEditor(intent: android.content.Intent)
     }
 }
