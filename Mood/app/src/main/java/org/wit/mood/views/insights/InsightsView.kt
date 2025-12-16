@@ -20,11 +20,24 @@ import org.wit.mood.models.MoodType
 import org.wit.mood.views.mood.MoodView
 import org.wit.mood.views.moodlist.MoodListView
 
+/**
+ * InsightsView
+ *
+ * View layer for the Insights screen (MVP pattern).
+ *
+ * Responsibilities:
+ *  - Display mood statistics for each day (average, counts, legend, ring chart)
+ *  - Provide day navigation (previous/next)
+ *  - Provide playlist links based on average mood
+ *  - Navigate to Home or Add Mood screens
+ *  - Handle empty state when no mood data exists
+ */
 class InsightsView : AppCompatActivity(), InsightsContract.View {
 
     private lateinit var binding: ActivityInsightsBinding
     private lateinit var presenter: InsightsPresenter
 
+    // Launcher for adding a new mood and refreshing data on return
     private val getResult =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == RESULT_OK) presenter.load()
@@ -35,34 +48,39 @@ class InsightsView : AppCompatActivity(), InsightsContract.View {
         binding = ActivityInsightsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Initialize presenter with view and MainApp reference
         presenter = InsightsPresenter(this, application as MainApp)
 
-        // bottom nav
+        // --- Bottom Navigation ---
         binding.bottomNav.selectedItemId = R.id.nav_chart
         binding.bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_home -> { openHome(); true }
-                R.id.nav_chart -> true
+                R.id.nav_home -> { openHome(); true }  // Navigate to home (mood list)
+                R.id.nav_chart -> true                  // Current screen
                 else -> false
             }
         }
         binding.bottomNav.setOnItemReselectedListener { }
 
-        // FAB add mood
+        // Floating action button to add a new mood
         binding.fabAdd.setOnClickListener { openAddMood() }
 
-        // day nav
+        // Day navigation buttons
         binding.btnPrevDay.setOnClickListener { presenter.onPrevDay() }
         binding.btnNextDay.setOnClickListener { presenter.onNextDay() }
 
-        // playlist
+        // Playlist button
         binding.btnOpenPlaylist.setOnClickListener { presenter.onOpenPlaylist() }
 
+        // Load initial data
         presenter.load()
     }
 
-    // ---- Contract methods ----
+    // ---------- Contract Methods ----------
 
+    /**
+     * Show empty state when there is no mood data.
+     */
     override fun showEmptyState() {
         binding.tvDate.text = getString(R.string.app_name)
         binding.tvAverage.text = "No data yet"
@@ -70,27 +88,43 @@ class InsightsView : AppCompatActivity(), InsightsContract.View {
         binding.legend.removeAllViews()
     }
 
+    /**
+     * Display a day's date and its average mood label.
+     */
     override fun showDay(date: String, averageLabel: String) {
         binding.tvDate.text = date
         binding.tvAverage.text = "Average: $averageLabel"
     }
 
+    /**
+     * Show or hide the playlist button based on availability.
+     */
     override fun showPlaylistButton(show: Boolean) {
         binding.btnOpenPlaylist.visibility = if (show) View.VISIBLE else View.GONE
     }
 
+    /**
+     * Enable/disable previous and next day navigation buttons.
+     */
     override fun enableDayNav(prevEnabled: Boolean, nextEnabled: Boolean) {
         binding.btnPrevDay.isEnabled = prevEnabled
         binding.btnNextDay.isEnabled = nextEnabled
     }
 
+    /**
+     * Update the mood ring chart with mood counts and average label.
+     */
     override fun updateRing(counts: Map<MoodType, Int>, averageLabel: String) {
         binding.moodRing.setData(counts, averageLabel)
     }
 
+    /**
+     * Render the legend showing icons, labels, and counts for each mood type.
+     */
     override fun renderLegend(counts: Map<MoodType, Int>) {
         binding.legend.removeAllViews()
 
+        // Map mood types to icon resources and colors
         val moodToIcon = mapOf(
             MoodType.HAPPY to R.drawable.ic_mood_happy_selector,
             MoodType.RELAXED to R.drawable.ic_mood_relaxed_selector,
@@ -107,6 +141,7 @@ class InsightsView : AppCompatActivity(), InsightsContract.View {
             MoodType.ANGRY to ContextCompat.getColor(this, R.color.mood_angry)
         )
 
+        // Populate legend dynamically
         MoodType.values().forEach { mood ->
             val item = layoutInflater.inflate(R.layout.view_legend_item, binding.legend, false)
             val icon = item.findViewById<ImageView>(R.id.icon)
@@ -127,9 +162,13 @@ class InsightsView : AppCompatActivity(), InsightsContract.View {
         }
     }
 
+    /**
+     * Open a Spotify playlist in the app if installed, or fallback to browser.
+     */
     override fun openUrlInSpotifyOrBrowser(url: String) {
         val uri = Uri.parse(url)
 
+        // Attempt to open in Spotify app
         val spotifyIntent = Intent(Intent.ACTION_VIEW, uri).apply {
             setPackage("com.spotify.music")
         }
@@ -138,6 +177,7 @@ class InsightsView : AppCompatActivity(), InsightsContract.View {
             return
         } catch (_: ActivityNotFoundException) { }
 
+        // Fallback to web browser
         val webIntent = Intent(Intent.ACTION_VIEW, uri)
         try {
             startActivity(webIntent)
@@ -147,12 +187,14 @@ class InsightsView : AppCompatActivity(), InsightsContract.View {
         }
     }
 
+    /** Navigate back to the home (mood list) screen. */
     override fun openHome() {
         startActivity(Intent(this, MoodListView::class.java))
         overridePendingTransition(0, 0)
         finish()
     }
 
+    /** Launch the Add Mood screen using ActivityResultLauncher. */
     override fun openAddMood() {
         getResult.launch(Intent(this, MoodView::class.java))
     }
