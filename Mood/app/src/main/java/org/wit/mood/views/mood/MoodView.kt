@@ -62,8 +62,13 @@ class MoodView : AppCompatActivity(), MoodContract.View {
         // Initialize presenter
         presenter = MoodPresenter(this)
 
-        // Default mood selection when creating a new entry
-        if (!presenter.edit) binding.chipNeutral.isChecked = true
+        // Set default selection for new mood
+        if (!presenter.edit) {
+            binding.chipNeutral.isChecked = true
+        } else {
+            // Edit mode → change button text to "Update Mood"
+            binding.btnAdd.text = getString(R.string.update)
+        }
 
         // Save/Add button
         binding.btnAdd.setOnClickListener {
