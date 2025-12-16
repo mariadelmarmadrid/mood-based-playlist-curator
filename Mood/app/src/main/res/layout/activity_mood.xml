@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Toolbar (so you can show the Share menu icon) -->
+    <!-- Toolbar -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/topAppBar"
         android:layout_width="match_parent"
@@ -12,7 +12,7 @@
         android:title="@string/app_name"
         app:popupTheme="@style/ThemeOverlay.Material3.Light" />
 
-    <!-- Your original screen content (unchanged) -->
+    <!-- ScrollView to allow vertical scrolling if content exceeds screen height -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
