@@ -13,11 +13,18 @@ import java.time.format.DateTimeFormatter
  * - Optional contextual details (sleep, social activity, hobby, food)
  * - A short user note
  * - A timestamp indicating when the mood was created
+ * - An optional photo URI pointing to an image stored on the device
+ * - An optional geographic location where the mood was recorded
  *
  * Implements [Parcelable] so it can be passed easily between Activities
  * (e.g., for editing a mood via Intents).
  */
 
+/**
+ * Represents a geographic location associated with a mood.
+ *
+ * Stores latitude, longitude and zoom level for map display.
+ */
 @Parcelize
 data class Location(
     var lat: Double = 0.0,
