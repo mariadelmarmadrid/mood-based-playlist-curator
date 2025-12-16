@@ -100,19 +100,30 @@
     <!-- Filter label for daily average slider -->
     <string name="min_daily_avg_label">Min daily average: All</string>
 
-
+    <!-- ==========================
+             Mood Photo Actions
+             ========================== -->
     <string name="mood_photo">Mood photo</string>
     <string name="button_add_photo">Add photo</string>
     <string name="button_remove_photo">Remove photo</string>
     <string name="button_change_photo">Change photo</string>
 
+    <!-- ==========================
+         Playlist Actions
+         ========================== -->
     <string name="button_open_playlist">Open Spotify playlist</string>
     <string name="error_no_spotify">Could not open Spotify playlist.</string>
     <string name="title_activity_mood_map">Mood Map</string>
 
+    <!-- ==========================
+         Map & Location
+         ========================== -->
     <string name="button_set_location">Set location</string>
     <string name="button_location_set">Location ✓</string>
 
+    <!-- ==========================
+         Sharing
+         ========================== -->
     <string name="share">Share</string>
 
 </resources>
