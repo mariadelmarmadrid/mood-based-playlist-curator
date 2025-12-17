@@ -1,133 +1,176 @@
 package org.wit.mood.views.moodlist
 
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import org.wit.mood.main.MainApp
 import org.wit.mood.models.DailyMoodSummary
 import org.wit.mood.models.MoodModel
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
+
+/**
+ * Date filter options for mood list filtering.
+ */
+enum class DateFilter {
+    ALL, TODAY, LAST_7_DAYS
+}
 
 /**
  * MoodListPresenter
  *
  * Presenter class for the Mood List feature (MVP pattern).
- *
- * Responsibilities:
- *  - Load moods from the data store
- *  - Group moods by day and calculate daily averages
- *  - Handle navigation to editor, map, and insights
- *  - Manage night mode settings
  */
-class MoodListPresenter(private val view: MoodListView) : MoodListContract.Presenter {
+class MoodListPresenter(
+    private val view: MoodListContract.View,
+    context: Context
+) : MoodListContract.Presenter {
 
-    // Reference to the main app for accessing the Mood data store
-    private val app: MainApp = view.application as MainApp
+    // Application reference
+    private val app: MainApp = context.applicationContext as MainApp
 
-    // SharedPreferences for storing settings (e.g., night mode)
+    // SharedPreferences for night mode
     private val prefs: SharedPreferences =
-        view.getSharedPreferences("settings", Context.MODE_PRIVATE)
+        context.getSharedPreferences("settings", Context.MODE_PRIVATE)
 
-    // Launcher for starting the Mood editor activity and handling results
-    private lateinit var moodEditorLauncher: ActivityResultLauncher<Intent>
+    // ---------------------------------------------------------------------
+    // Filter state
+    // ---------------------------------------------------------------------
 
-    /**
-     * Initialize presenter:
-     *  - Registers callback for mood editor
-     *  - Loads the initial list of moods
-     */
+    private var searchQuery = ""
+    private var dateFilter = DateFilter.ALL
+    private var minDailyAverage = -2
+
+    // ---------------------------------------------------------------------
+    // Initialisation
+    // ---------------------------------------------------------------------
+
     init {
-        registerMoodEditorCallback()
         loadMoods()
     }
 
-    /**
-     * Loads all moods from the store, groups them by day,
-     * sorts them, calculates average daily mood, and sends
-     * the data to the view for rendering.
-     */
+    // ---------------------------------------------------------------------
+    // Data loading & filtering
+    // ---------------------------------------------------------------------
+
     override fun loadMoods() {
         val moods = app.moods.findAll()
-
-        val days = moods
-            .groupBy { it.timestamp.take(10) } // Group by date (yyyy-MM-dd)
-            .map { (date, moodsInDay) ->
-                val sorted = moodsInDay.sortedByDescending { it.timestamp } // Latest first
-                val avg = if (sorted.isNotEmpty()) sorted.map { it.type.score }.average() else 0.0
-                DailyMoodSummary(date, sorted, avg) // Wrap into daily summary
-            }
-            .sortedByDescending { it.date } // Most recent days first
-
-        view.renderList(days)
+        val summaries = DailyMoodSummary.fromMoods(moods)
+        view.renderList(summaries)
     }
 
-    /** Opens the Mood editor to add a new mood. */
+    override fun applyFilters() {
+        val allMoods = app.moods.findAll()
+
+        val filtered = allMoods.filter { mood ->
+            matchesSearch(mood) && matchesDate(mood)
+        }
+
+        val summaries = DailyMoodSummary
+            .fromMoods(filtered)
+            .filter { it.averageScore >= minDailyAverage }
+
+        view.renderList(summaries)
+    }
+
+    override fun resetFilters() {
+        searchQuery = ""
+        dateFilter = DateFilter.ALL
+        minDailyAverage = -2
+        loadMoods()
+    }
+
+    // ---------------------------------------------------------------------
+    // Filter setters
+    // ---------------------------------------------------------------------
+
+    override fun onSearchQueryChanged(query: String) {
+        searchQuery = query.lowercase()
+    }
+
+    override fun onDateFilterChanged(filter: DateFilter) {
+        dateFilter = filter
+    }
+
+    override fun onMinAverageChanged(value: Int) {
+        minDailyAverage = value
+    }
+
+    // ---------------------------------------------------------------------
+    // Navigation
+    // ---------------------------------------------------------------------
+
     override fun openAddMood() {
         view.launchMoodEditor()
     }
 
-    /**
-     * Opens the Mood editor to edit an existing mood.
-     *
-     * @param mood The MoodModel to edit
-     */
     override fun openEditMood(mood: MoodModel) {
         view.launchMoodEditor(mood)
     }
 
-    /** Navigates to the Map view. */
     override fun openMap() {
         view.navigateToMap()
     }
 
-    /** Navigates to the Insights view and closes the list view. */
     override fun openInsights() {
         view.navigateToInsights()
         view.finishView()
     }
 
-    /**
-     * Loads the current night mode setting from SharedPreferences
-     * and applies it to the view.
-     */
+    // ---------------------------------------------------------------------
+    // Night mode
+    // ---------------------------------------------------------------------
+
     override fun loadNightMode() {
-        val enabled = prefs.getBoolean("night_mode", false)
-        view.applyNightMode(enabled)
+        view.applyNightMode(prefs.getBoolean("night_mode", false))
     }
 
-    /**
-     * Toggles night mode on/off and updates both preferences
-     * and the view.
-     */
     override fun doToggleNightMode() {
-        val current = prefs.getBoolean("night_mode", false)
-        val next = !current
+        val next = !prefs.getBoolean("night_mode", false)
         prefs.edit().putBoolean("night_mode", next).apply()
         view.applyNightMode(next)
     }
 
-    /**
-     * Registers the callback for the Mood editor activity.
-     *
-     * When the editor returns RESULT_OK, the mood list is reloaded.
-     */
-    private fun registerMoodEditorCallback() {
-        moodEditorLauncher =
-            view.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (result.resultCode == AppCompatActivity.RESULT_OK) {
-                    loadMoods()
-                }
-            }
+    // ---------------------------------------------------------------------
+    // Helper filter logic
+    // ---------------------------------------------------------------------
+
+    private fun matchesSearch(mood: MoodModel): Boolean {
+        return searchQuery.isBlank() ||
+                mood.note.lowercase().contains(searchQuery)
     }
 
-    /**
-     * Launches the Mood editor activity using the registered launcher.
-     *
-     * @param intent Intent to start the editor
-     */
-    override fun launchEditor(intent: Intent) {
-        moodEditorLauncher.launch(intent)
+    private fun matchesDate(mood: MoodModel): Boolean {
+        val time = parseTimestamp(mood.timestamp)
+
+        return when (dateFilter) {
+            DateFilter.ALL -> true
+            DateFilter.TODAY -> isToday(time)
+            DateFilter.LAST_7_DAYS -> isWithinLast7Days(time)
+        }
+    }
+
+    private fun isToday(timestamp: Long): Boolean {
+        val today = Calendar.getInstance()
+        val date = Calendar.getInstance().apply { timeInMillis = timestamp }
+
+        return today.get(Calendar.YEAR) == date.get(Calendar.YEAR) &&
+                today.get(Calendar.DAY_OF_YEAR) == date.get(Calendar.DAY_OF_YEAR)
+    }
+
+    private fun isWithinLast7Days(timestamp: Long): Boolean {
+        val sevenDaysAgo = Calendar.getInstance().apply {
+            add(Calendar.DAY_OF_YEAR, -7)
+        }.timeInMillis
+
+        return timestamp >= sevenDaysAgo
+    }
+
+    private fun parseTimestamp(timestamp: String): Long {
+        val formatter = SimpleDateFormat(
+            "yyyy-MM-dd HH:mm:ss",
+            Locale.getDefault()
+        )
+        return formatter.parse(timestamp)?.time ?: 0L
     }
 }

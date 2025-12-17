@@ -91,6 +91,12 @@ interface MoodListContract {
          *
          * @param intent Intent to start the editor
          */
-        fun launchEditor(intent: android.content.Intent)
+
+        fun onSearchQueryChanged(query: String)
+        fun onDateFilterChanged(filter: DateFilter)
+        fun onMinAverageChanged(value: Int)
+        fun applyFilters()
+        fun resetFilters()
+
     }
 }

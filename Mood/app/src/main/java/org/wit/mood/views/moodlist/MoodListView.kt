@@ -5,8 +5,12 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.LinearLayoutManager
 import org.wit.mood.R
 import org.wit.mood.activities.MoodMapActivity
@@ -21,33 +25,52 @@ import org.wit.mood.views.mood.MoodView
  * MoodListView
  *
  * Activity implementing the Mood List screen (View in MVP pattern).
- *
- * Responsibilities:
- *  - Displays the list of moods grouped by day
- *  - Handles UI interactions (FAB, bottom navigation, top menu)
- *  - Delegates actions to the presenter
- *  - Supports night mode theming
  */
 class MoodListView : AppCompatActivity(), MoodListContract.View {
 
     private lateinit var binding: ActivityMoodListBinding
     private lateinit var presenter: MoodListPresenter
+    private var filterVisible = false
+    private lateinit var moodEditorLauncher: ActivityResultLauncher<Intent>
+
+    // ---------------------------------------------------------------------
+    // Lifecycle
+    // ---------------------------------------------------------------------
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMoodListBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Initialize the presenter
-        presenter = MoodListPresenter(this)
+        presenter = MoodListPresenter(this, this)
 
-        // Set toolbar as ActionBar
         setSupportActionBar(binding.topAppBar)
 
-        // Configure RecyclerView with LinearLayoutManager
-        binding.recyclerView.layoutManager = LinearLayoutManager(this)
+        setupRecyclerView()
+        setupBottomNavigation()
+        setupFab()
+        setupFilters()
 
-        // ---------- Bottom navigation ----------
+        presenter.loadNightMode()
+
+        moodEditorLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == RESULT_OK) {
+                    presenter.loadMoods()
+                }
+            }
+
+    }
+
+    // ---------------------------------------------------------------------
+    // Setup methods
+    // ---------------------------------------------------------------------
+
+    private fun setupRecyclerView() {
+        binding.recyclerView.layoutManager = LinearLayoutManager(this)
+    }
+
+    private fun setupBottomNavigation() {
         binding.bottomNav.selectedItemId = R.id.nav_home
         binding.bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -60,22 +83,90 @@ class MoodListView : AppCompatActivity(), MoodListContract.View {
             }
         }
         binding.bottomNav.setOnItemReselectedListener { }
-
-        // Floating action button opens Add Mood screen
-        binding.fabAdd.setOnClickListener { presenter.openAddMood() }
-
-        // Apply saved night mode setting
-        presenter.loadNightMode()
     }
 
-    // ---------- Top menu ----------
+    private fun setupFab() {
+        binding.fabAdd.setOnClickListener {
+            presenter.openAddMood()
+        }
+    }
+
+    private fun setupFilters() {
+
+        // Search notes
+        binding.inputSearchNotes.doAfterTextChanged { text ->
+            presenter.onSearchQueryChanged(text?.toString().orEmpty())
+            presenter.applyFilters()
+        }
+
+        // Date filter chips
+        binding.chipsDate.setOnCheckedStateChangeListener { _, checkedIds ->
+            when (checkedIds.firstOrNull()) {
+                R.id.chipToday ->
+                    presenter.onDateFilterChanged(DateFilter.TODAY)
+                R.id.chipLast7 ->
+                    presenter.onDateFilterChanged(DateFilter.LAST_7_DAYS)
+                else ->
+                    presenter.onDateFilterChanged(DateFilter.ALL)
+            }
+            presenter.applyFilters()
+        }
+
+        // Min daily average slider
+        binding.sliderMinAvg.addOnChangeListener { _, value, _ ->
+            presenter.onMinAverageChanged(value.toInt())
+            binding.avgLabel.text = "Min daily average: ${value.toInt()}"
+            presenter.applyFilters()
+        }
+
+        // Apply filters
+        binding.btnApply.setOnClickListener {
+            presenter.applyFilters()
+            binding.filterCard.visibility = View.GONE
+            filterVisible = false
+        }
+
+
+        // Reset filters
+        binding.btnReset.setOnClickListener {
+
+            // 1. Reset presenter state
+            presenter.resetFilters()
+
+            // 2. Reset search input
+            binding.inputSearchNotes.setText("")
+
+            // 3. Reset date chips to ALL
+            binding.chipsDate.check(R.id.chipAllDates)
+
+            // 4. Reset slider to default
+            binding.sliderMinAvg.value = -2f
+            binding.avgLabel.text = "Min daily average: -2"
+
+            // 5. Close filter card
+            binding.filterCard.visibility = View.GONE
+            filterVisible = false
+        }
+
+    }
+
+    // ---------------------------------------------------------------------
+    // Top menu
+    // ---------------------------------------------------------------------
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_top, menu) // Inflate menu once
+        menuInflater.inflate(R.menu.menu_top, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            R.id.action_filter -> {
+                filterVisible = !filterVisible
+                binding.filterCard.visibility =
+                    if (filterVisible) View.VISIBLE else View.GONE
+                true
+            }
             R.id.action_map -> {
                 presenter.openMap()
                 true
@@ -88,13 +179,10 @@ class MoodListView : AppCompatActivity(), MoodListContract.View {
         }
     }
 
-    // ---------- Contract methods (View interface) ----------
+    // ---------------------------------------------------------------------
+    // Contract methods
+    // ---------------------------------------------------------------------
 
-    /**
-     * Renders the list of daily moods in the RecyclerView.
-     *
-     * @param days List of DailyMoodSummary objects to display
-     */
     override fun renderList(days: List<DailyMoodSummary>) {
         binding.recyclerView.adapter = DailyMoodAdapter(
             days = days,
@@ -104,50 +192,40 @@ class MoodListView : AppCompatActivity(), MoodListContract.View {
         )
     }
 
-    /**
-     * Launches the Mood editor Activity.
-     *
-     * @param mood Optional MoodModel to edit; null opens Add Mood
-     */
     override fun launchMoodEditor(mood: MoodModel?) {
         val intent = Intent(this, MoodView::class.java)
         mood?.let { intent.putExtra("mood_edit", it) }
-        presenter.launchEditor(intent)
+        moodEditorLauncher.launch(intent)
     }
 
-    /** Navigates to the Map view. */
+
     override fun navigateToMap() {
         startActivity(Intent(this, MoodMapActivity::class.java))
     }
 
-    /** Navigates to the Insights screen. */
     override fun navigateToInsights() {
         startActivity(Intent(this, InsightsView::class.java))
     }
 
-    /**
-     * Applies night mode to the Activity.
-     *
-     * Uses AppCompatDelegate and avoids unnecessary recreation if
-     * the desired mode matches the current mode.
-     *
-     * @param enabled Whether night mode should be enabled
-     */
     override fun applyNightMode(enabled: Boolean) {
-        val desired = if (enabled) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+        val desired = if (enabled)
+            AppCompatDelegate.MODE_NIGHT_YES
+        else
+            AppCompatDelegate.MODE_NIGHT_NO
 
-        // Determine current night mode
-        val currentNight = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        val desiredNight = if (enabled) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
+        val currentNight =
+            resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
 
-        // Only apply if different from current
+        val desiredNight =
+            if (enabled) Configuration.UI_MODE_NIGHT_YES
+            else Configuration.UI_MODE_NIGHT_NO
+
         if (currentNight == desiredNight) return
 
         AppCompatDelegate.setDefaultNightMode(desired)
-        recreate() // Refresh activity to apply new theme
+        recreate()
     }
 
-    /** Finishes the current Activity. */
     override fun finishView() {
         finish()
     }
